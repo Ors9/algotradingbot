@@ -5,3 +5,4 @@ target/
 .idea/
 *.iml
 binance-connector-java/
+src/main/java/com/algotradingbot/Config.java
