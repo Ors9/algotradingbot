@@ -5,12 +5,38 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+
 public class BacktestEngine {
 
     private final ArrayList<Candle> records;
 
     public BacktestEngine() {
         records = new ArrayList<>();
+
+    }
+
+    public void parseCandles(String json) {
+        try {
+            JSONArray arr = new JSONArray(json);
+            records.clear(); // ננקה את הרשימה לפני מילוי חדש
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONArray c = arr.getJSONArray(i);
+
+                String date = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm")
+                        .format(new java.util.Date(c.getLong(0)));
+
+                double open = Double.parseDouble(c.getString(1));
+                double high = Double.parseDouble(c.getString(2));
+                double low = Double.parseDouble(c.getString(3));
+                double close = Double.parseDouble(c.getString(4));
+
+                records.add(new Candle(date, open, high, low, close));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to parse Binance JSON: " + e.getMessage());
+        }
     }
 
     public void loadCsv(String filePath) {
@@ -58,7 +84,7 @@ public class BacktestEngine {
         }
     }
 
-    public ArrayList<Candle> getCandles(){
+    public ArrayList<Candle> getCandles() {
         return records;
     }
 }

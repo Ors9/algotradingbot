@@ -1,15 +1,28 @@
 package com.algotradingbot;
 
 public class App {
+
     public static void main(String[] args) {
+        String json = "";
+        try {
+            json = getDataFromBinance.fetchKlines("BTCUSDT", "1d", 1000); // או כל טיקר אחר
+
+        } catch (Exception e) {
+            System.err.println("Failed to fetch data from Binance: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
         BacktestEngine bte = new BacktestEngine();
-        bte.loadCsv("data/sample.csv"); 
+        bte.parseCandles(json);
         bte.printRecords();
+
+
         System.out.println("=========Print Signals======");
         Strategy strategy = new Strategy(bte.getCandles());
-
-        double signalsBuy = strategy.runBackTest();
-        
+        strategy.runBackTest();
+        strategy.evaluteSignals();
+        strategy.showResult();
 
     }
 }
