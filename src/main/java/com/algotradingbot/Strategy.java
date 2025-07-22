@@ -4,13 +4,12 @@ import java.util.ArrayList;
 
 public class Strategy {
 
-    private static final double SL_BUFFER = 20.0;
-    private static final double ENTRY_BUFFER = 20.0;
     private static final double RISK_PER_TRADE_USD = 20.0;
 
     private final ArrayList<Candle> candles;
     private final ArrayList<Signal> signals;
-    private final int SMA_DAYS = 20;
+    private final int SMA_DAYS_20 = 20;
+    private final int SMA_DAYS_50 = 50;
 
     public Strategy(ArrayList<Candle> candles) {
         this.candles = candles;
@@ -18,41 +17,15 @@ public class Strategy {
     }
 
     public void runBackTest() {
-
-        for (int i = SMA_DAYS + 1; i < candles.size(); i++) {
+        // We need at least 51 candles because strategy uses SMA(50)
+        for (int i = SMA_DAYS_50 + 1; i < candles.size(); i++) {
             Candle prev = candles.get(i - 1);
             Candle curr = candles.get(i);
 
-            // כל עוד אף אחת מהתבניות לא מתקיימת – ממש הלאה
-            if (!(isInsideBar(prev, curr) || isDoji(curr) || isHammer(curr))) {
-                continue;
-            }
-
-            // מסנן נרות לא ירוקים
-            if (curr.getClose() <= curr.getOpen()) {
-                continue;
-            }
-
-            // יחס גוף לטווח
-            double bodyToRange = (curr.getClose() - curr.getOpen()) / (curr.getHigh() - curr.getLow());
-            if (bodyToRange < 0.5) {
-                continue;
-            }
-
-            // ממוצע נע 50
-            double sma50 = calculateSMA(i - 1, 50);
-            if (curr.getClose() < sma50) {
-                continue;
-            }
-
-            // התנאי הסופי לכניסה לפי SMA
-            double sma = calculateSMA(i - 1, SMA_DAYS);
-            if (prev.getClose() > sma) {
+            if (strategyInsideBar(prev, curr, i)) {
                 signals.add(createBuySignal(i, curr));
-                System.out.println("BUY on " + curr.getDate() + " at price: " + curr.getHigh());
             }
         }
-
     }
 
     private Signal createBuySignal(int index, Candle curr) {
@@ -63,15 +36,64 @@ public class Strategy {
         return new Signal(index, entry, tp, sl);
     }
 
-    private double calculateSMA(int index, int period) {
-        if (index < period) {
-            return -1;
+    private double calculateSMA(int index, int period) throws Exception {
+        if (index - period + 1 < 0) {
+            throw new IllegalArgumentException("Not enough candles to calculate SMA at index " + index);
         }
         double sum = 0;
         for (int i = index - period + 1; i <= index; i++) {
             sum += candles.get(i).getClose();
         }
         return sum / period;
+    }
+
+    public static boolean isGreenCandle(Candle candle) {
+        return candle.getClose() > candle.getOpen();
+    }
+
+    public boolean hasStrongBody(Candle curr) {
+        double range = curr.getHigh() - curr.getLow();
+        if (range == 0) {
+            return false; // כדי למנוע חילוק באפס
+
+        }
+        double body = Math.abs(curr.getClose() - curr.getOpen());
+        double bodyToRange = body / range;
+        return bodyToRange >= 0.5;
+    }
+
+    public boolean strategyInsideBar(Candle prev, Candle curr, int index) {
+        if (!isInsideBar(prev, curr)) {
+            return false;
+        }
+        if (!isGreenCandle(curr)) {
+            return false;
+        }
+        if (!hasStrongBody(curr)) {
+            return false;
+        }
+
+        try {
+            double sma50 = calculateSMA(index - 1, SMA_DAYS_50);
+            if (sma50 == -1) {
+                return false;
+            }
+            if (curr.getClose() < sma50) {
+                return false;
+            }
+
+            double sma20 = calculateSMA(index - 1, SMA_DAYS_20);
+            if (sma20 == -1) {
+                return false;
+            }
+            if (curr.getClose() < sma20) {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean isInsideBar(Candle prev, Candle curr) {
@@ -114,6 +136,9 @@ public class Strategy {
 
             if (signal.isEvaluated()) {
                 double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
+                if (stopSize == 0) {
+                    continue;
+                }
                 double positionSize = RISK_PER_TRADE_USD / stopSize;
 
                 double profitPerTrade = signal.isWinSignal()
