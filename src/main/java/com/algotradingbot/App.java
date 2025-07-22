@@ -5,7 +5,7 @@ public class App {
     public static void main(String[] args) {
         String json = "";
         try {
-            json = getDataFromBinance.fetchKlines("BTCUSDT", "1d", 1000); // או כל טיקר אחר
+            json = getDataFromBinance.fetchKlines("BTCUSDT", "15m", 1000); // או כל טיקר אחר
 
         } catch (Exception e) {
             System.err.println("Failed to fetch data from Binance: " + e.getMessage());
@@ -25,4 +25,8 @@ public class App {
         strategy.showResult();
 
     }
+
+
+
+    
 }

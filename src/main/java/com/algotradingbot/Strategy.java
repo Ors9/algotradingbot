@@ -10,6 +10,7 @@ public class Strategy {
     private final ArrayList<Signal> signals;
     private final int SMA_DAYS_20 = 20;
     private final int SMA_DAYS_50 = 50;
+    private final int RISK_REWARD = 5; /* meaning 1 to 5  */
 
     public Strategy(ArrayList<Candle> candles) {
         this.candles = candles;
@@ -32,7 +33,7 @@ public class Strategy {
         double entry = curr.getHigh() + 20;         // כניסה 20 דולר מעל high
         double sl = curr.getLow() - 20;             // SL 20 דולר מתחת ל־low
         double range = entry - sl;                  // מרחק בין כניסה ל־SL
-        double tp = entry + 2 * range;                 // TP של 1:1
+        double tp = entry + (RISK_REWARD* range);                 // TP של 1:1
         return new Signal(index, entry, tp, sl);
     }
 
