@@ -5,6 +5,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.json.JSONArray;
+import org.json.JSONTokener;
+
 public class getDataFromBinance {
 
     public static String fetchKlines(String symbol, String interval, int limit) throws Exception {
@@ -35,32 +38,49 @@ public class getDataFromBinance {
         return response.toString();
     }
 
-    public static String fetchKlines(String symbol, String interval, int limit, long startTime) throws Exception {
-        String urlString = String.format(
-                "https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&limit=%d&startTime=%d",
-                symbol, interval, limit, startTime);
+    public static String fetchKlinesRange(String symbol, String interval, long startTime, long endTime) throws Exception {
+        JSONArray allCandles = new JSONArray();
+        long currentStart = startTime;
 
-        URL url = new URL(urlString);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("Accept", "application/json");
+        while (currentStart < endTime) {
+            String urlString = String.format(
+                    "https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&limit=1000&startTime=%d",
+                    symbol, interval, currentStart);
 
-        int status = con.getResponseCode();
-        if (status != 200) {
-            throw new RuntimeException("HTTP error: " + status);
+            URL url = new URL(urlString);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Accept", "application/json");
+
+            int status = con.getResponseCode();
+            if (status != 200) {
+                throw new RuntimeException("HTTP error: " + status);
+            }
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            con.disconnect();
+
+            JSONArray batch = new JSONArray(new JSONTokener(response.toString()));
+            if (batch.length() == 0) {
+                break;
+            }
+
+            for (int i = 0; i < batch.length(); i++) {
+                allCandles.put(batch.getJSONArray(i));
+            }
+
+            // Advance currentStart to the close time of the last candle
+            long lastCloseTime = batch.getJSONArray(batch.length() - 1).getLong(6);
+            currentStart = lastCloseTime + 1;
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-
-        in.close();
-        con.disconnect();
-        return response.toString();
+        return allCandles.toString();
     }
 
 }

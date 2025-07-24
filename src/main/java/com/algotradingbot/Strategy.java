@@ -1,5 +1,7 @@
 package com.algotradingbot;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class Strategy {
@@ -10,8 +12,20 @@ public class Strategy {
     private final ArrayList<Signal> signals;
     private final int SMA_DAYS_20 = 20;
     private final int SMA_DAYS_50 = 50;
-    private final int RISK_REWARD = 5; /* meaning 1 to 5  */
+    private final int SMA_DAYS_200 = 200;
 
+    private final double RISK_REWARD = 5; /*yet 5 best , */
+    private static final int[][] TRADING_SESSIONS = {
+        {8, 12}, // טווח 1: בוקר
+        {12, 16}, // טווח 2: צהריים
+        {16, 20}, // טווח 3: ערב
+        {20, 23}, // טווח 4: לילה מוקדם
+        {0, 8} // טווח 5: לילה עמוק
+    };
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    /* meaning 1 to 5  */
     public Strategy(ArrayList<Candle> candles) {
         this.candles = candles;
         signals = new ArrayList<>();
@@ -33,7 +47,7 @@ public class Strategy {
         double entry = curr.getHigh() + 20;         // כניסה 20 דולר מעל high
         double sl = curr.getLow() - 20;             // SL 20 דולר מתחת ל־low
         double range = entry - sl;                  // מרחק בין כניסה ל־SL
-        double tp = entry + (RISK_REWARD* range);                 // TP של 1:1
+        double tp = entry + (RISK_REWARD * range);                 // TP של 1:5
         return new Signal(index, entry, tp, sl);
     }
 
@@ -48,7 +62,16 @@ public class Strategy {
         return sum / period;
     }
 
-    public static boolean isGreenCandle(Candle candle) {
+    private boolean isBearMarket(int index) {
+        try {
+            double sma200 = calculateSMA(index - 1, SMA_DAYS_200);
+            return candles.get(index).getClose() < sma200;
+        } catch (Exception e) {
+            return true; // assume bear if not enough data
+        }
+    }
+
+    public boolean isGreenCandle(Candle candle) {
         return candle.getClose() > candle.getOpen();
     }
 
@@ -67,6 +90,22 @@ public class Strategy {
         if (!isInsideBar(prev, curr)) {
             return false;
         }
+        if (isBearMarket(index)) {
+            return false; // skip signal during bear trend
+        }
+
+        if (isSaturday(curr.getDate())) {
+            return false;
+        }
+
+        if (isSunday(curr.getDate())) {
+            return false;
+        }
+
+        if (!isTradingHour(curr)) {
+            return false;
+        }
+
         if (!isGreenCandle(curr)) {
             return false;
         }
@@ -95,6 +134,28 @@ public class Strategy {
         }
 
         return true;
+    }
+
+    public int getHourFromDate(String dateStr) {
+        LocalDateTime dateTime = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
+        return dateTime.getHour();
+    }
+
+    public boolean isSunday(String dateStr) {
+        LocalDateTime dateTime = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
+        return dateTime.getDayOfWeek() == java.time.DayOfWeek.SUNDAY;
+    }
+
+    public boolean isSaturday(String dateStr) {
+        LocalDateTime dateTime = LocalDateTime.parse(dateStr, DATE_TIME_FORMATTER);
+        return dateTime.getDayOfWeek() == java.time.DayOfWeek.SATURDAY;
+    }
+
+    public boolean isTradingHour(Candle curr) {
+        int hour = getHourFromDate(curr.getDate());
+
+        // טווח יחיד שנמצא כיעיל: 8:00–12:00
+        return hour >= TRADING_SESSIONS[0][0] && hour <= TRADING_SESSIONS[0][1];
     }
 
     public boolean isInsideBar(Candle prev, Candle curr) {
@@ -126,28 +187,44 @@ public class Strategy {
     }
 
     public void showResult() {
+        System.out.println("========= Signal Results =========");
+        //printSignals();
+        printPerformanceStats();
+    }
+
+    public void printSignals() {
+        for (Signal signal : signals) {
+            System.out.println(signal);
+        }
+    }
+
+    private void printPerformanceStats() {
         int winCount = 0;
         int lossCount = 0;
         double totalProfit = 0;
 
-        System.out.println("========= Signal Results =========");
+        double runningBalance = 0;
+        double peakBalance = 0;
+        double maxDrawdown = 0;
 
         for (Signal signal : signals) {
-            System.out.println(signal);
-
             if (signal.isEvaluated()) {
                 double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
                 if (stopSize == 0) {
                     continue;
                 }
+
                 double positionSize = RISK_PER_TRADE_USD / stopSize;
 
                 double profitPerTrade = signal.isWinSignal()
                         ? (signal.getTpPrice() - signal.getEntryPrice()) * positionSize
-                        : (signal.getStopPrice() - signal.getEntryPrice()) * positionSize; // שלילי
+                        : (signal.getStopPrice() - signal.getEntryPrice()) * positionSize;
+
+                runningBalance += profitPerTrade;
+                peakBalance = Math.max(peakBalance, runningBalance);
+                maxDrawdown = Math.max(maxDrawdown, peakBalance - runningBalance);
 
                 totalProfit += profitPerTrade;
-
                 if (signal.isWinSignal()) {
                     winCount++;
                 } else {
@@ -165,6 +242,7 @@ public class Strategy {
         System.out.println("Losers : " + lossCount);
         System.out.printf("Win Rate: %.2f%%\n", winRate);
         System.out.printf("Total Net Profit: $%.2f\n", totalProfit);
+        System.out.printf("Max Drawdown: $%.2f\n", maxDrawdown);
     }
 
 }
