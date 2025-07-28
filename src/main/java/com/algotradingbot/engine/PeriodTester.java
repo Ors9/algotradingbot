@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 import com.algotradingbot.core.Performance;
+import com.algotradingbot.strategies.DashMarketStrategy;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
 
 public class PeriodTester {
@@ -14,6 +15,10 @@ public class PeriodTester {
             {1604188800000L, 1609459200000L}, // נובמבר–דצמבר 2020
             {1646092800000L, 1648771200000L}, // מרץ 2022
             {1672444800000L, 1675123200000L}, // ינואר 2023
+        };
+
+        long[][] dashMarketPeriods = {
+            {1685923200000L, 1687737600000L} // 5–26 ביוני 2023 (XRPUSDT היה בריינג' אופייני)
         };
 
         long[][] bullMarketPeriods = {
@@ -38,6 +43,8 @@ public class PeriodTester {
         all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
+        all = all.add(runPeriodGroup(" Dash Market - Flat Range XRP", dashMarketPeriods, symbol, interval));
+
 
         System.out.println("\n ============OVERALL TOTAL PERFORMANCE ACROSS ALL PERIODS:=============");
         all.print();
@@ -60,9 +67,14 @@ public class PeriodTester {
                 CandlesEngine bte = new CandlesEngine();
                 bte.parseCandles(json);
 
-                Performance perf = testOldInsideBarStrategy(bte);
-                perf.print();
-                groupPerformance = groupPerformance.add(perf);
+                /*Performance perf1 = testOldInsideBarStrategy(bte);
+                System.out.println("Results for OldInsideBarStrategy:");
+                perf1.print();
+                groupPerformance = groupPerformance.add(perf1);*/
+                Performance perf2 = testDashMarketStrategy(bte);
+                System.out.println("Results for DashMarketStrategy:");
+                perf2.print();
+                groupPerformance = groupPerformance.add(perf2);
 
                 System.out.println("-------------------------------------------\n");
 
@@ -78,6 +90,14 @@ public class PeriodTester {
 
     private static Performance testOldInsideBarStrategy(CandlesEngine bte) {
         OldInsideBarStrategy strategy = new OldInsideBarStrategy(bte.getCandles());
+        strategy.runBackTest();
+        strategy.evaluateSignals();
+        //strategy.printSignals();
+        return strategy.evaluatePerformance();
+    }
+
+    private static Performance testDashMarketStrategy(CandlesEngine bte) {
+        DashMarketStrategy strategy = new DashMarketStrategy(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();

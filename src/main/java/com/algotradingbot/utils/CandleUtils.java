@@ -16,6 +16,15 @@ public class CandleUtils {
         return Math.abs(c.getClose() - c.getOpen()) / range >= 0.5;
     }
 
+    public static boolean isBullishEngulfing(Candle prev, Candle curr) {
+        return (prev.getClose() < prev.getOpen())
+                && // נר קודם אדום
+                (curr.getClose() > curr.getOpen())
+                && // נר נוכחי ירוק
+                (curr.getOpen() < prev.getClose())
+                && (curr.getClose() > prev.getOpen());
+    }
+
     public static boolean isInsideBar(Candle prev, Candle curr) {
         double margin = 0.002 * prev.getHigh();
         return curr.getHigh() <= prev.getHigh() + margin

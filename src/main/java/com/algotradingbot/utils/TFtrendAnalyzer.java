@@ -31,6 +31,7 @@ public class TFtrendAnalyzer {
             CandlesEngine bte = new CandlesEngine();
             bte.parseCandles(json);
             candles1D.addAll(bte.getCandles());
+            Thread.sleep(300);
 
         } catch (Exception e) {
             System.err.println("TFtrendAnalyzer fetch error: " + e.getMessage());

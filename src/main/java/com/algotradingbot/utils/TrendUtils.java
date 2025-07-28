@@ -3,11 +3,31 @@ package com.algotradingbot.utils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.algotradingbot.core.Candle;
 
-
 public class TrendUtils {
+
+    public static final double ADX_FLAT_THRESHOLD = 20.0;      // שוק מדשדש (רוב הזמן)
+    public static final double ADX_TRENDING_THRESHOLD = 25.0;  // התחלה של מגמה
+    public static final double ADX_STRONG_TREND = 40.0;        // מגמה חזקה מאוד
+
+    public static final double RSI_OVERSOLD = 30.0;
+    public static final double RSI_OVERBOUGHT = 70.0;
+
+    public static boolean isShortTermUptrendHolding(ArrayList<Candle> candles, int index, int smaShortPeriod, int smaMidPeriod , int smaLargePeriod) {
+        try {
+            double smaShort = calculateSMA(candles, index, smaShortPeriod);
+            double smaMid = calculateSMA(candles, index, smaMidPeriod);
+            double smaLarge = calculateSMA(candles, index, smaLargePeriod);
+            double close = candles.get(index).getClose();
+
+            return smaShort > smaMid && close > smaLarge;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public static boolean isStrongBullMarket(ArrayList<Candle> candles, int index, int sma20, int sma50, int sma200) {
         try {
@@ -51,5 +71,107 @@ public class TrendUtils {
             System.err.println("High TF trend check failed: " + e.getMessage());
             return false;
         }
+
     }
+
+    public static BollingerBands getBollingerBands(List<Candle> candles, int index, int period) {
+        if (index < period - 1) {
+            return null; // Not enough candles
+        }
+
+        double sma;
+        try {
+            sma = calculateSMA(new ArrayList<>(candles), index, period); // נדרש cast כי calculateSMA מקבלת ArrayList
+        } catch (Exception e) {
+            return null;
+        }
+
+        double variance = 0;
+        for (int i = index - period + 1; i <= index; i++) {
+            double diff = candles.get(i).getClose() - sma;
+            variance += diff * diff;
+        }
+        double stdDev = Math.sqrt(variance / period);
+
+        double upper = sma + 2 * stdDev;
+        double lower = sma - 2 * stdDev;
+
+        return new BollingerBands(sma, upper, lower);
+    }
+
+    public static Double calculateRSI(List<Candle> candles, int index, int period) {
+        if (index < period) {
+            return null;
+        }
+
+        double gain = 0;
+        double loss = 0;
+
+        for (int i = index - period + 1; i <= index; i++) {
+            double change = candles.get(i).getClose() - candles.get(i - 1).getClose();
+            if (change > 0) {
+                gain += change;
+            } else {
+                loss -= change; // הופך ל־חיובי
+            }
+        }
+
+        double avgGain = gain / period;
+        double avgLoss = loss / period;
+
+        if (avgLoss == 0) {
+            return 100.0; // אין ירידות → RSI מקסימלי
+        }
+        double rs = avgGain / avgLoss;
+        return 100 - (100 / (1 + rs));
+    }
+
+    public static Double calculateADX(List<Candle> candles, int index, int period) {
+        if (index < period + 1) {
+            return null; // צריך מספיק נרות גם לחישוב ממוצעים
+        }
+
+        double trSum = 0;
+        double plusDmSum = 0;
+        double minusDmSum = 0;
+        List<Double> dxList = new ArrayList<>();
+
+        // נצבור TR, +DM, -DM ל־period ימים
+        for (int i = index - period + 1; i <= index; i++) {
+            Candle curr = candles.get(i);
+            Candle prev = candles.get(i - 1);
+
+            double highDiff = curr.getHigh() - prev.getHigh();
+            double lowDiff = prev.getLow() - curr.getLow();
+
+            double plusDM = (highDiff > lowDiff && highDiff > 0) ? highDiff : 0;
+            double minusDM = (lowDiff > highDiff && lowDiff > 0) ? lowDiff : 0;
+
+            double tr = Math.max(
+                    curr.getHigh() - curr.getLow(),
+                    Math.max(
+                            Math.abs(curr.getHigh() - prev.getClose()),
+                            Math.abs(curr.getLow() - prev.getClose())
+                    )
+            );
+
+            trSum += tr;
+            plusDmSum += plusDM;
+            minusDmSum += minusDM;
+        }
+
+        double atr = trSum / period;
+        double plusDI = 100 * (plusDmSum / period) / atr;
+        double minusDI = 100 * (minusDmSum / period) / atr;
+
+        if (plusDI + minusDI == 0) {
+            return 0.0;
+        }
+
+        double dx = 100 * Math.abs(plusDI - minusDI) / (plusDI + minusDI);
+
+        // נחזיר פשוט את dx כמייצג ADX. אפשר לשפר בהמשך ל־EMA של DX לאורך זמן.
+        return dx;
+    }
+
 }
