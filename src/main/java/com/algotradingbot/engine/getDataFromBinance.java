@@ -1,4 +1,4 @@
-package com.algotradingbot;
+package com.algotradingbot.engine;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

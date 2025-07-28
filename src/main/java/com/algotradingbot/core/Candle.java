@@ -1,4 +1,4 @@
-package com.algotradingbot;
+package com.algotradingbot.core;
 
 public class Candle {
 

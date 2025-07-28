@@ -1,4 +1,4 @@
-package com.algotradingbot;
+package com.algotradingbot.core;
 
 import java.util.ArrayList;
 
@@ -8,15 +8,23 @@ public class Signal {
     private final double entryPrice;
     private final double stopPrice;
     private final double tpPrice;
+    private double posSize20USD;
     private boolean winSignal;      // true = הצלחה, false = כישלון
     private boolean evaluated;      // האם נותח כבר
 
-    public Signal(int index, double entryPrice, double tpPrice, double stopPrice) {
+    public Signal(int index, double entryPrice, double tpPrice, double stopPrice, double riskUsd) {
         this.indexInCandleList = index;
         this.entryPrice = entryPrice;
-        this.tpPrice = tpPrice;       // ✔️ ערך מוחלט, לא מכפלה
-        this.stopPrice = stopPrice;   // ✔️ גם ערך מוחלט
+        this.tpPrice = tpPrice;
+        this.stopPrice = stopPrice;
         this.evaluated = false;
+
+        double riskPerUnit = Math.abs(entryPrice - stopPrice);
+        this.posSize20USD = riskPerUnit > 0 ? riskUsd / riskPerUnit : 0;
+    }
+
+    public double getPosSize20USD() {
+        return posSize20USD;
     }
 
     // ===== Getters & Setters =====
@@ -61,7 +69,7 @@ public class Signal {
                 + '}';
     }
 
-    public void evaluteSignal(Signal signal, ArrayList<Candle> candles) {
+    public void evaluateSignal(Signal signal, ArrayList<Candle> candles) {
         int startIndex = signal.getIndex();
         for (int i = startIndex; i < candles.size(); i++) {
             Candle c = candles.get(i);
@@ -75,5 +83,7 @@ public class Signal {
             }
         }
     }
+
+    
 
 }

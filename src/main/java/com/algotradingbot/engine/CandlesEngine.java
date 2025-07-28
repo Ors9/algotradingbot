@@ -1,4 +1,4 @@
-package com.algotradingbot;
+package com.algotradingbot.engine;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,11 +7,13 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
-public class BacktestEngine {
+import com.algotradingbot.core.Candle;
+
+public class CandlesEngine {
 
     private final ArrayList<Candle> records;
 
-    public BacktestEngine() {
+    public CandlesEngine() {
         records = new ArrayList<>();
 
     }
