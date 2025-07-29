@@ -53,6 +53,30 @@ public class TrendUtils {
         }
     }
 
+    public static double averageVolume(ArrayList<Candle> candles, int startIndex, int period) {
+        if (startIndex - period + 1 < 0) {
+            throw new IllegalArgumentException("Not enough candles for volume average");
+        }
+
+        double sum = 0;
+        for (int i = startIndex - period + 1; i <= startIndex; i++) {
+            sum += candles.get(i).getVolume(); // בהנחה שיש getter ל-volume
+        }
+        return sum / period;
+    }
+
+    public static double averageRSI(ArrayList<Candle> candles, int startIndex, int period) {
+        if (startIndex - period + 1 < 0) {
+            throw new IllegalArgumentException("Not enough candles for RSI average");
+        }
+
+        double sum = 0;
+        for (int i = startIndex - period + 1; i <= startIndex; i++) {
+            sum += calculateRSI(candles, i, 14); // או כל תקופת RSI שתרצה
+        }
+        return sum / period;
+    }
+
     public static double calculateSMA(ArrayList<Candle> candles, int index, int period) throws Exception {
         if (index - period + 1 < 0) {
             throw new IllegalArgumentException("Not enough candles");
