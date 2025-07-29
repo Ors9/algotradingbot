@@ -122,20 +122,20 @@ public class CandleChart extends JFrame {
                 Date.from(endLdt.atZone(ZoneId.systemDefault()).toInstant())
         );
 
-        // ✅ נחשב את מרווח הזמן הכולל בדקות בין תחילת לטווח הסוף
-        long totalMinutes = java.time.Duration.between(startLdt, endLdt).toMinutes();
+        // 🧠 חשב את סך הדקות בטווח
+        long totalMinutes = Math.max(1, java.time.Duration.between(startLdt, endLdt).toMinutes());
 
-        // ✅ נגדיר כמה תוויות נרצה על ציר הזמן (למשל 10)
+        // 🧠 כמה תוויות אנחנו רוצים בציר
         int targetLabelCount = 10;
-        long minutesPerTick = totalMinutes / targetLabelCount;
+        long minutesPerTick = Math.max(1, totalMinutes / targetLabelCount); // ✅ הגנה מ־0
 
-        // ✅ קביעת סוג ה-TickUnit בהתאם לגודל
+        // ✅ קבע את יחידת הטיק לפי גודל
         if (minutesPerTick < 60) {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.MINUTE, (int) Math.max(1, minutesPerTick)));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.MINUTE, (int) minutesPerTick));
         } else if (minutesPerTick < 1440) {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.HOUR, (int) Math.max(1, minutesPerTick / 60)));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.HOUR, (int) (minutesPerTick / 60)));
         } else {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, (int) Math.max(1, minutesPerTick / 1440)));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, (int) (minutesPerTick / 1440)));
         }
 
         axis.setLowerMargin(0.01);
