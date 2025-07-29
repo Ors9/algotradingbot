@@ -65,7 +65,8 @@ public class TrendRSIBBBand extends TradingStrategy {
         }
 
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        if (curr.getLow() >= bb.lower * 1.01) {
+        double touchThreshold = (bb.lower + bb.sma) / 2;
+        if (curr.getLow() > touchThreshold) {
             countInvalidBB++;
             return false;
         }
