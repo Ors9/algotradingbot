@@ -30,6 +30,10 @@ public class Candle {
         return date;
     }
 
+    public double getBodyHeight() {
+        return Math.abs(close - open);
+    }
+
     public double getOpen() {
         return open;
     }

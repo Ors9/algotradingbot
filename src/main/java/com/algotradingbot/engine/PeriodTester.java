@@ -3,12 +3,30 @@ package com.algotradingbot.engine;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
-import com.algotradingbot.core.CandleChart;
+import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.Performance;
-import com.algotradingbot.strategies.DashMarketStrategy;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
+import com.algotradingbot.strategies.TrendRSIBBBand;
 
 public class PeriodTester {
+
+    public static void runSinglePeriodTest(String symbol, String interval, long start, long end) {
+        System.out.println("\n============ SINGLE BIG PERIOD TEST ============\n");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        System.out.printf("Period: %s ➝ %s\n", sdf.format(new Date(start)), sdf.format(new Date(end)));
+
+        try {
+            String json = getDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
+            CandlesEngine bte = new CandlesEngine();
+            bte.parseCandles(json);
+
+            Performance perf = testTrendRSIBBBand(bte);
+            System.out.println("Results for Strategy:");
+            perf.print();
+        } catch (Exception e) {
+            System.err.println("Error during test: " + e.getMessage());
+        }
+    }
 
     public static void runTestsForMultiplePeriods(String symbol, String interval) {
         long[][] crisisPeriods = {
@@ -43,7 +61,7 @@ public class PeriodTester {
         //all = all.add(runPeriodGroup(" Corona Time crisisPeriods", crisisPeriods, symbol, interval));
         //all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
         //all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
-        //all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
+        all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Dash Market - Flat Range XRP", dashMarketPeriods, symbol, interval));
 
         System.out.println("\n ============OVERALL TOTAL PERFORMANCE ACROSS ALL PERIODS:=============");
@@ -71,7 +89,7 @@ public class PeriodTester {
                 System.out.println("Results for OldInsideBarStrategy:");
                 perf1.print();
                 groupPerformance = groupPerformance.add(perf1);*/
-                Performance perf2 = testDashMarketStrategy(bte);
+                Performance perf2 = testTrendRSIBBBand(bte);
                 System.out.println("Results for DashMarketStrategy:");
                 perf2.print();
                 groupPerformance = groupPerformance.add(perf2);
@@ -94,17 +112,17 @@ public class PeriodTester {
         strategy.evaluateSignals();
         //strategy.printSignals();
         Performance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles() , strategy.getSignals(), perf);
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf);
         return strategy.evaluatePerformance();
     }
 
-    private static Performance testDashMarketStrategy(CandlesEngine bte) {
-        DashMarketStrategy strategy = new DashMarketStrategy(bte.getCandles());
+    private static Performance testTrendRSIBBBand(CandlesEngine bte) {
+        TrendRSIBBBand strategy = new TrendRSIBBBand(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();
         Performance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles() , strategy.getSignals(), perf);
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf);
         return strategy.evaluatePerformance();
     }
 }

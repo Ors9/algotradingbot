@@ -3,8 +3,6 @@ package com.algotradingbot.strategies;
 import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
-import com.algotradingbot.core.CandleChart;
-import com.algotradingbot.core.Performance;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.BollingerBands;
@@ -12,13 +10,13 @@ import com.algotradingbot.utils.CandleUtils;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
-public class DashMarketStrategy extends TradingStrategy {
+public class TrendRSIBBBand extends TradingStrategy {
 
     private final int MIN_CANDLES_FOR_STRATEGY = 300;
     private final int BOLLINGER_PERIOD = 20;
     private final int RSI_PERIOD = 14;
 
-    public DashMarketStrategy(ArrayList<Candle> candles) {
+    public TrendRSIBBBand(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
         this.riskReward = 5;
