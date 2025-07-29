@@ -51,17 +51,46 @@ public class DatasetFactory {
         return new TimeSeriesCollection(series);
     }
 
+    public static DefaultHighLowDataset createDataset(ArrayList<Candle> candles) {
+        return createCandleDataset(candles); // avoid redundancy
+    }
+
+    public static TimeSeriesCollection createBollingerSeries(ArrayList<Candle> candles, int period, String type) {
+        TimeSeries series = new TimeSeries(type);
+        for (int i = period - 1; i < candles.size(); i++) {
+            BollingerBands bb = TrendUtils.getBollingerBands(candles, i, period);
+            if (bb != null) {
+                LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
+                Minute time = new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                double value;
+                switch (type) {
+                    case "Upper Band":
+                        value = bb.upper;
+                        break;
+                    case "Lower Band":
+                        value = bb.lower;
+                        break;
+                    case "Middle Band":
+                        value = bb.sma;
+                        break;
+                    default:
+                        value = 0;
+                }
+                series.addOrUpdate(time, value);
+            }
+        }
+        return new TimeSeriesCollection(series);
+    }
+
     public static TimeSeriesCollection createSMADataset(ArrayList<Candle> candles, int period) {
         TimeSeries series = new TimeSeries("SMA" + period);
         for (int i = period - 1; i < candles.size(); i++) {
-            double sma;
             try {
-                sma = TrendUtils.calculateSMA(candles, i, period);
+                double sma = TrendUtils.calculateSMA(candles, i, period);
                 LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
                 series.add(new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant())), sma);
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
             }
-
         }
         return new TimeSeriesCollection(series);
     }
@@ -99,5 +128,30 @@ public class DatasetFactory {
             new TimeSeriesCollection(lower),
             new TimeSeriesCollection(middle)
         };
+    }
+
+    public static TimeSeries createVolumeSeries(ArrayList<Candle> candles) {
+        TimeSeries series = new TimeSeries("Volume");
+        for (Candle c : candles) {
+            LocalDateTime ldt = LocalDateTime.parse(c.getDate(), FORMATTER);
+            series.addOrUpdate(new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant())), c.getVolume());
+        }
+        return series;
+    }
+
+    public static TimeSeries createSMASeries(ArrayList<Candle> candles, int period) {
+        TimeSeries smaSeries = new TimeSeries("SMA" + period);
+        for (int i = period - 1; i < candles.size(); i++) {
+            try {
+                double smaValue = TrendUtils.calculateSMA(candles, i, period);
+                LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
+                Minute time = new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+                smaSeries.addOrUpdate(time, smaValue);
+            } catch (Exception e) {
+                System.err.println("Error computing SMA at index " + i + ": " + e.getMessage());
+            }
+        }
+        return smaSeries;
+
     }
 }

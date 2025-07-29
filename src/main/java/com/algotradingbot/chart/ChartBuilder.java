@@ -1,13 +1,13 @@
 package com.algotradingbot.chart;
 
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
+
 import java.awt.Font;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import org.jfree.chart.ChartPanel;
+
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.DateTickMarkPosition;
@@ -15,6 +15,8 @@ import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.chart.ui.HorizontalAlignment;
+import org.jfree.chart.ui.RectangleInsets;
+
 
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Performance;
@@ -22,80 +24,70 @@ import com.algotradingbot.core.Signal;
 
 public class ChartBuilder {
 
-    public static JFreeChart buildFullChart(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf) {
-        // יצירת תתי גרפים (נרות, ווליום, RSI)
-        XYPlot candlePlot = PlotFactory.createCandlePlot(candles);
+    // Constants
+    private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 16);
+    private static final Font SUBTITLE_FONT = new Font("Arial", Font.PLAIN, 12);
+    private static final Color TITLE_COLOR = new Color(50, 50, 50);
+    private static final Color SUBTITLE_COLOR = new Color(80, 80, 80);
 
+    private static final int CANDLE_WEIGHT = 5;
+    private static final int VOLUME_WEIGHT = 1;
+    private static final int RSI_WEIGHT = 2;
+
+    
+
+    public static JFreeChart buildFullChart(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf) {
+        if (candles == null || candles.isEmpty()) {
+            throw new IllegalArgumentException("Candle list is empty or null.");
+        }
+
+        XYPlot candlePlot = PlotFactory.createCandlePlot(candles);
         XYPlot volumePlot = PlotFactory.createVolumePlot(candles);
         XYPlot rsiPlot = PlotFactory.createRSIPlot(candles);
 
-        // ציר זמן משותף
-        DateAxis timeAxis = new DateAxis("Time");
-        timeAxis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH:mm"));
-        timeAxis.setAutoRange(true);                      // ✅ זה עובר למעלה
-        timeAxis.setAutoTickUnitSelection(true);   // ✅ מאפשר שינוי מרווחים עם Zoom
-        timeAxis.setTickMarkPosition(DateTickMarkPosition.MIDDLE); // אופציונלי
-        timeAxis.setLowerMargin(0.05);
-        timeAxis.setUpperMargin(0.05);
-        timeAxis.setTickLabelsVisible(true);
-        timeAxis.setVerticalTickLabels(true); // אם התאריכים עולים אחד על השני
+        DateAxis timeAxis = createTimeAxis();
 
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(timeAxis);
-        combinedPlot.add(candlePlot, 5);
-        combinedPlot.add(volumePlot, 1);
-        combinedPlot.add(rsiPlot, 2);
+        combinedPlot.add(candlePlot, CANDLE_WEIGHT);
+        combinedPlot.add(volumePlot, VOLUME_WEIGHT);
+        combinedPlot.add(rsiPlot, RSI_WEIGHT);
         combinedPlot.setBackgroundPaint(Color.WHITE);
 
-        // הגרף הראשי
         JFreeChart chart = new JFreeChart("", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, false);
 
-        // הוספת טקסט ביצועים
         addPerformanceTitles(chart, perf);
-
-        // חצים של כניסות
         AnnotationUtils.addSignalAnnotations(candlePlot, candles, signals);
 
         return chart;
     }
 
-    private static void addPerformanceTitles(JFreeChart chart, Performance perf) {
-        TextTitle title = new TextTitle("Performance Summary");
-        title.setFont(new Font("Arial", Font.BOLD, 16));
-        title.setPaint(new Color(50, 50, 50));
-        title.setHorizontalAlignment(HorizontalAlignment.CENTER);
-        title.setPadding(new org.jfree.chart.ui.RectangleInsets(5, 10, 5, 10));
+    private static DateAxis createTimeAxis() {
+        DateAxis axis = new DateAxis("Time");
+        axis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH:mm"));
+        axis.setAutoRange(true);
+        axis.setAutoTickUnitSelection(true);
+        axis.setTickMarkPosition(DateTickMarkPosition.MIDDLE);
+        axis.setLowerMargin(0.05);
+        axis.setUpperMargin(0.05);
+        axis.setTickLabelsVisible(true);
+        axis.setVerticalTickLabels(true);
+        return axis;
+    }
 
-        TextTitle details = new TextTitle(perf.toString());
-        details.setFont(new Font("Arial", Font.PLAIN, 12));
-        details.setPaint(new Color(80, 80, 80));
+    private static void addPerformanceTitles(JFreeChart chart, Performance perf) {
+        TextTitle title = new TextTitle("Performance Summary", TITLE_FONT);
+        title.setPaint(TITLE_COLOR);
+        title.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        title.setPadding(new RectangleInsets(5, 10, 5, 10));
+
+        TextTitle details = new TextTitle(perf.toString(), SUBTITLE_FONT);
+        details.setPaint(SUBTITLE_COLOR);
         details.setHorizontalAlignment(HorizontalAlignment.RIGHT);
-        details.setPadding(new org.jfree.chart.ui.RectangleInsets(0, 10, 5, 10));
+        details.setPadding(new RectangleInsets(0, 10, 5, 10));
 
         chart.addSubtitle(title);
         chart.addSubtitle(details);
     }
 
-    public static ChartPanel createInteractivePanel(JFreeChart chart) {
-        CombinedDomainXYPlot combinedPlot = (CombinedDomainXYPlot) chart.getPlot();
-        combinedPlot.setDomainPannable(true);
 
-        for (Object subplot : combinedPlot.getSubplots()) {
-            if (subplot instanceof XYPlot) {
-                ((XYPlot) subplot).setDomainPannable(true);
-            }
-        }
-
-        ChartPanel panel = new ChartPanel(chart);
-        panel.setMouseWheelEnabled(true);   // ✅ חובה - מאפשר zoom עם גלגלת
-        panel.setMouseZoomable(true);       // ✅ חובה - מפעיל zoom על mouse wheel
-
-        // לא נוגע בפאנינג, לא ב-Range
-        panel.setDomainZoomable(true);      // Zoom בציר הזמן (X)
-        panel.setRangeZoomable(false);      // לא צריך בציר Y
-
-        panel.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-        panel.setPreferredSize(new Dimension(1600, 800));
-        return panel;
-    }
-    
 }
