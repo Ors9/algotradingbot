@@ -78,7 +78,7 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         double avgRsiLast10 = TrendUtils.averageRSI(candles, index - 10, 10);
         double rsi = TrendUtils.calculateRSI(candles, index, 14);
-        if (rsi > avgRsiLast10 - 5 ) {
+        if (rsi > avgRsiLast10 - 10 ) {
             countInvalidRSI++;
             return false;
         }
