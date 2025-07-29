@@ -35,11 +35,9 @@ public class AnnotationUtils {
             Date date = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
             double x = new Millisecond(date).getFirstMillisecond();
 
-            double y = signal.isWinSignal()
-                    ? Math.min(candle.getOpen(), candle.getClose()) - candle.getBodyHeight() * 0.3
-                    : Math.max(candle.getOpen(), candle.getClose()) + candle.getBodyHeight() * 0.3;
+            double y = Math.max(candle.getOpen(), candle.getClose()) + candle.getBodyHeight() * 0.3;
 
-            String marker = signal.isWinSignal() ? "↑" : "↓";
+            String marker = "↓";
             Color color = signal.isWinSignal() ? Color.GREEN : Color.RED;
 
             XYTextAnnotation annotation = new XYTextAnnotation(marker, x, y);
