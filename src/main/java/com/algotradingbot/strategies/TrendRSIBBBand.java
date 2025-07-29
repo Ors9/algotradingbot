@@ -40,14 +40,14 @@ public class TrendRSIBBBand extends TradingStrategy {
             }
         }
 
-        System.out.println("=== סיכום DEBUG ===");
-        System.out.println("📉 מגמה לא תקינה:         " + countInvalidTrend);
-        System.out.println("📉 לא נגע ב-BB:            " + countInvalidBB);
-        System.out.println("⏰ זמן לא מסחרי:          " + countInvalidTime);
-        System.out.println("📊 RSI גבוה מדי:          " + countInvalidRSI);
-        System.out.println("🕯️ גוף חלש / נר לא ירוק: " + countInvalidBodyOrColor);
-        System.out.println("📉 בלי תבנית היפוך:       " + countInvalidPattern);
-        System.out.println("✅ עסקאות שעברו הכל:       " + countValidSignals);
+        System.out.println("=== DEBUG SUMMARY ===");
+        System.out.println("Invalid trend:           " + countInvalidTrend);
+        System.out.println("Did not touch BB:        " + countInvalidBB);
+        System.out.println("Non-trading time:        " + countInvalidTime);
+        System.out.println("RSI too high:            " + countInvalidRSI);
+        System.out.println("Weak body / not green:   " + countInvalidBodyOrColor);
+        System.out.println("No reversal pattern:     " + countInvalidPattern);
+        System.out.println("Signals that passed all: " + countValidSignals);
     }
 
     private boolean strategyValid(int index) {
@@ -65,7 +65,6 @@ public class TrendRSIBBBand extends TradingStrategy {
             countInvalidBB++;
             return false;
         }
-        
 
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
             countInvalidTime++;
@@ -78,7 +77,6 @@ public class TrendRSIBBBand extends TradingStrategy {
             countInvalidRSI++;
             return false;
         }
-        
 
         if (!CandleUtils.hasStrongBody(curr) || !CandleUtils.isGreen(curr)) {
             countInvalidBodyOrColor++;

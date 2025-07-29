@@ -81,11 +81,29 @@ public class CandleChart extends JFrame {
         candlePlot.setDomainPannable(true); // ✅ פאן בציר הזמן
         candlePlot.setRangePannable(true);
 
-        priceAxis.setAutoRange(true);
+        int visibleCount = 1000;
+        int startIndex = Math.max(0, candles.size() - visibleCount);
+        int endIndex = candles.size() - 1;
+
+        double minPrice = Double.MAX_VALUE;
+        double maxPrice = Double.MIN_VALUE;
+
+        for (int i = startIndex; i <= endIndex; i++) {
+            Candle c = candles.get(i);
+            minPrice = Math.min(minPrice, c.getLow());
+            maxPrice = Math.max(maxPrice, c.getHigh());
+        }
+
+        double padding = (maxPrice - minPrice) * 0.02;
+        minPrice -= padding;
+        maxPrice += padding;
+
+        priceAxis.setAutoRange(false);
         priceAxis.setAutoRangeIncludesZero(false);
         priceAxis.setAutoRangeStickyZero(false); // ✅ חשוב – שלא ינסה "להדביק" את 0
         priceAxis.setLowerMargin(0.05); // קצת מרווח מתחת לנרות
         priceAxis.setUpperMargin(0.05); // קצת מרווח מעל לנרות
+        priceAxis.setRange(minPrice, maxPrice);
         // --- גרף Volume ---
         TimeSeries series = new TimeSeries(""); // <-- אין כותרת מיותרת
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -109,6 +127,20 @@ public class CandleChart extends JFrame {
         // --- שילוב עם ציר זמן משותף ---
         DateAxis timeAxis = new DateAxis("Time");
         timeAxis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH:mm"));
+        timeAxis.setAutoRange(false);
+
+        // הגדרת טווח תצוגה התחלתית (למשל, 1000 נרות אחרונים)
+        int visibleCount2 = 1000;
+        int startIndex2 = Math.max(0, candles.size() - visibleCount2);
+        int endIndex2 = candles.size() - 1;
+
+        LocalDateTime startLdt = LocalDateTime.parse(candles.get(startIndex2).getDate(), formatter);
+        LocalDateTime endLdt = LocalDateTime.parse(candles.get(endIndex2).getDate(), formatter);
+
+        java.util.Date startDate = Date.from(startLdt.atZone(ZoneId.systemDefault()).toInstant());
+        java.util.Date endDate = Date.from(endLdt.atZone(ZoneId.systemDefault()).toInstant());
+
+        timeAxis.setRange(startDate, endDate);
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(timeAxis);
         combinedPlot.add(candlePlot, 5); // משקל גדול יותר לנרות
         combinedPlot.add(volumePlot, 1); // משקל קטן ל-volume
@@ -127,7 +159,7 @@ public class CandleChart extends JFrame {
         perfTitle.setHorizontalAlignment(HorizontalAlignment.RIGHT);
         chart.addSubtitle(perfTitle);
 
-        priceAxis.setAutoRange(true);
+        
         priceAxis.setAutoRangeIncludesZero(false);
         priceAxis.setTickLabelFont(new Font("Arial", Font.PLAIN, 12));
         priceAxis.setLabelFont(new Font("Arial", Font.BOLD, 13));
