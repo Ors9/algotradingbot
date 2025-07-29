@@ -65,6 +65,7 @@ public class TrendRSIBBBand extends TradingStrategy {
             countInvalidBB++;
             return false;
         }
+        
 
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
             countInvalidTime++;
@@ -77,6 +78,7 @@ public class TrendRSIBBBand extends TradingStrategy {
             countInvalidRSI++;
             return false;
         }
+        
 
         if (!CandleUtils.hasStrongBody(curr) || !CandleUtils.isGreen(curr)) {
             countInvalidBodyOrColor++;

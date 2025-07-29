@@ -8,12 +8,18 @@ public class CandleUtils {
         return c.getClose() > c.getOpen();
     }
 
+    public static boolean isAlmostGreen(Candle c) {
+        double diff = c.getClose() - c.getOpen();
+        double range = c.getHigh() - c.getLow();
+        return diff >= 0 || (diff > -0.1 * range); // לא ירידה דרמטית
+    }
+
     public static boolean hasStrongBody(Candle c) {
         double range = c.getHigh() - c.getLow();
         if (range == 0) {
             return false;
         }
-        return Math.abs(c.getClose() - c.getOpen()) / range >= 0.5;
+        return Math.abs(c.getClose() - c.getOpen()) / range >= 0.55;
     }
 
     public static boolean isBullishEngulfing(Candle prev, Candle curr) {
@@ -37,6 +43,24 @@ public class CandleUtils {
         double upperWick = c.getHigh() - Math.max(c.getOpen(), c.getClose());
 
         return lowerWick > 2 * body && upperWick < body;
+    }
+
+    // Piercing Line: נר ירוק שחודר לפחות 50% מגוף אדום קודם
+    public static boolean isPiercingLine(Candle prev, Candle curr) {
+        if (!Candle.isRed(prev) || !isGreen(curr)) {
+            return false;
+        }
+
+        double prevBodyMid = (prev.getOpen() + prev.getClose()) / 2;
+        return curr.getOpen() < prev.getLow() && curr.getClose() > prevBodyMid;
+    }
+
+    // Morning Star: שלישייה – ירידה חזקה, נר קטן, ואז עלייה חזקה
+    public static boolean isMorningStar(Candle c1, Candle c2, Candle c3) {
+        return Candle.isRed(c1)
+                && Candle.isSmallBody(c2)
+                && isGreen(c3)
+                && c3.getClose() > ((c1.getOpen() + c1.getClose()) / 2);
     }
 
     public static boolean isDoji(Candle c) {
