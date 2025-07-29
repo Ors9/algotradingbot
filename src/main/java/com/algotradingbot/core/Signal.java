@@ -8,7 +8,7 @@ public class Signal {
     private final double entryPrice;
     private final double stopPrice;
     private final double tpPrice;
-    private double posSize20USD;
+    private final double posSize20USD;
     private boolean winSignal;      // true = הצלחה, false = כישלון
     private boolean evaluated;      // האם נותח כבר
 

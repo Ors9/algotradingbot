@@ -3,6 +3,8 @@ package com.algotradingbot.strategies;
 import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
+import com.algotradingbot.core.CandleChart;
+import com.algotradingbot.core.Performance;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.BollingerBands;
@@ -31,6 +33,8 @@ public class DashMarketStrategy extends TradingStrategy {
                 signals.add(signal);
             }
         }
+
+
     }
 
     private boolean strategyValid(int index) {
@@ -41,7 +45,6 @@ public class DashMarketStrategy extends TradingStrategy {
         /*if (!TrendUtils.isShortTermUptrendHolding(candles, index, 20, 50, 200)) {
             return false;
         }*/
-
         // BB pullback zone
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
         double distanceFromLower = (curr.getClose() - bb.lower) / (bb.upper - bb.lower);
@@ -52,7 +55,6 @@ public class DashMarketStrategy extends TradingStrategy {
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
             return false;
         }
-
 
         if (!CandleUtils.hasStrongBody(curr)) {
             return false;

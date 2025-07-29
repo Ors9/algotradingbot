@@ -35,4 +35,13 @@ public class Performance {
         System.out.printf("W:%-3d | L:%-3d | WinRate: %5.2f%% | Profit: $%8.2f | MaxDD: $%8.2f\n",
                 winCount, lossCount, winRate, totalProfit, maxDrawdown);
     }
+
+    @Override
+    public String toString() {
+        int total = winCount + lossCount;
+        double winRate = total > 0 ? 100.0 * winCount / total : 0;
+
+        return String.format("W:%-3d | L:%-3d | WinRate: %5.2f%% | Profit: $%8.2f | MaxDD: $%8.2f",
+                winCount, lossCount, winRate, totalProfit, maxDrawdown);
+    }
 }

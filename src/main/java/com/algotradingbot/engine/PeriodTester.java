@@ -3,6 +3,7 @@ package com.algotradingbot.engine;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 
+import com.algotradingbot.core.CandleChart;
 import com.algotradingbot.core.Performance;
 import com.algotradingbot.strategies.DashMarketStrategy;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
@@ -39,12 +40,11 @@ public class PeriodTester {
 
         Performance all = new Performance(0, 0, 0, 0);
 
-        all = all.add(runPeriodGroup(" Corona Time crisisPeriods", crisisPeriods, symbol, interval));
-        all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
-        all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
-        all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
+        //all = all.add(runPeriodGroup(" Corona Time crisisPeriods", crisisPeriods, symbol, interval));
+        //all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
+        //all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
+        //all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Dash Market - Flat Range XRP", dashMarketPeriods, symbol, interval));
-
 
         System.out.println("\n ============OVERALL TOTAL PERFORMANCE ACROSS ALL PERIODS:=============");
         all.print();
@@ -93,6 +93,8 @@ public class PeriodTester {
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();
+        Performance perf = strategy.evaluatePerformance();
+        CandleChart.showChart(strategy.getCandles() , strategy.getSignals(), perf);
         return strategy.evaluatePerformance();
     }
 
@@ -101,6 +103,8 @@ public class PeriodTester {
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();
+        Performance perf = strategy.evaluatePerformance();
+        CandleChart.showChart(strategy.getCandles() , strategy.getSignals(), perf);
         return strategy.evaluatePerformance();
     }
 }

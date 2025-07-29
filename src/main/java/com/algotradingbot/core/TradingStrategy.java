@@ -2,6 +2,8 @@ package com.algotradingbot.core;
 
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
+
 public abstract class TradingStrategy {
 
     protected ArrayList<Candle> candles;
@@ -9,7 +11,7 @@ public abstract class TradingStrategy {
     protected double riskPerTradeUSD;
     protected double riskReward;
 
-    public TradingStrategy(ArrayList<Candle> candles) {
+    public TradingStrategy(ArrayList<Candle> candles ) {
         this.candles = candles;
         signals = new ArrayList<>();
     }
@@ -26,6 +28,12 @@ public abstract class TradingStrategy {
     public ArrayList<Signal> getSignals() {
         return signals;
     }
+
+    public ArrayList<Candle> getCandles(){
+        return candles;
+    }
+
+
 
     public Performance evaluatePerformance() {
         int winCount = 0;

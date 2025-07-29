@@ -33,8 +33,9 @@ public class CandlesEngine {
                 double high = Double.parseDouble(c.getString(2));
                 double low = Double.parseDouble(c.getString(3));
                 double close = Double.parseDouble(c.getString(4));
+                double volume = Double.parseDouble(c.getString(5));
 
-                records.add(new Candle(date, open, high, low, close));
+                records.add(new Candle(date, open, high, low, close, volume));
             }
         } catch (Exception e) {
             System.err.println("Failed to parse Binance JSON: " + e.getMessage());
@@ -61,7 +62,8 @@ public class CandlesEngine {
                             Double.parseDouble(val[1]),
                             Double.parseDouble(val[2]),
                             Double.parseDouble(val[3]),
-                            Double.parseDouble(val[4]));
+                            Double.parseDouble(val[4]),
+                            Double.parseDouble(val[5]));
                     records.add(candle);
                 } catch (NumberFormatException e) {
                     System.err.println("Skipping line with invalid numbers: " + line);
