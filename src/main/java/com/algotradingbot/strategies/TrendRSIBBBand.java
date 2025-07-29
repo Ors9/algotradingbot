@@ -54,18 +54,13 @@ public class TrendRSIBBBand extends TradingStrategy {
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
 
-        /*if (!TrendUtils.isShortTermUptrendHolding(candles, index, 20, 50, 200)) {
-            countInvalidTrend++;
-            return false;
-        }
-         */
         if (!TrendUtils.isBullishEnough(candles, index)) {
             countInvalidTrend++;
             return false;
         }
 
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        double touchThreshold = (bb.lower + bb.sma) / 2;
+        double touchThreshold = bb.lower * 1.02; // רק 2% מעל התחתון
         if (curr.getLow() > touchThreshold) {
             countInvalidBB++;
             return false;
@@ -78,7 +73,7 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         double avgRsiLast10 = TrendUtils.averageRSI(candles, index - 10, 10);
         double rsi = TrendUtils.calculateRSI(candles, index, 14);
-        if (rsi > avgRsiLast10 - 10 ) {
+        if (rsi > avgRsiLast10 - 10) {
             countInvalidRSI++;
             return false;
         }
