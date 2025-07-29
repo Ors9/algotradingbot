@@ -134,9 +134,14 @@ public class CandleChart extends JFrame {
         priceAxis.setTickLabelInsets(new org.jfree.chart.ui.RectangleInsets(2, 5, 2, 5)); // ריווח פנימי
         priceAxis.setLabelInsets(new org.jfree.chart.ui.RectangleInsets(5, 5, 5, 5));     // מרווח כותרת
 
-        addSMAtoCandlePlot(candlePlot, candles, 20, 1, Color.BLUE);
-        addSMAtoCandlePlot(candlePlot, candles, 50, 2, Color.MAGENTA);
-        addBollingerBands(candlePlot, candles, 20, 3);
+        int smaDatasetIndex = 1;
+        addSMAtoCandlePlot(candlePlot, candles, 20, smaDatasetIndex++, Color.BLUE);
+        addSMAtoCandlePlot(candlePlot, candles, 50, smaDatasetIndex++, Color.GREEN);
+        addSMAtoCandlePlot(candlePlot, candles, 200, smaDatasetIndex++, Color.RED);
+
+        int bbDatasetStartIndex = smaDatasetIndex; // start after SMAs
+        addBollingerBands(candlePlot, candles, 20, bbDatasetStartIndex); // indices 4, 5, 6
+
         XYPlot rsiPlot = createRSIPlot(candles, 14);
         combinedPlot.add(rsiPlot, 2); // Give RSI subplot smaller weight
 
@@ -291,17 +296,17 @@ public class CandleChart extends JFrame {
 
         // Renderer for all bands (reuse same styling with different colors)
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
-        renderer.setSeriesPaint(0, Color.GRAY);
+        renderer.setSeriesPaint(0, Color.BLACK);
         renderer.setSeriesStroke(0, new BasicStroke(1f));
         candlePlot.setRenderer(datasetIndexBase, renderer);
 
         XYLineAndShapeRenderer renderer2 = new XYLineAndShapeRenderer(true, false);
-        renderer2.setSeriesPaint(0, Color.GRAY);
+        renderer2.setSeriesPaint(0, Color.BLACK);
         renderer2.setSeriesStroke(0, new BasicStroke(1f));
         candlePlot.setRenderer(datasetIndexBase + 1, renderer2);
 
         XYLineAndShapeRenderer renderer3 = new XYLineAndShapeRenderer(true, false);
-        renderer3.setSeriesPaint(0, Color.BLACK); // SMA (middle band)
+        renderer3.setSeriesPaint(0, Color.BLUE); // SMA (middle band)
         renderer3.setSeriesStroke(0, new BasicStroke(1.2f));
         candlePlot.setRenderer(datasetIndexBase + 2, renderer3);
     }

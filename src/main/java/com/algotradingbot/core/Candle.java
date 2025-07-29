@@ -1,5 +1,9 @@
 package com.algotradingbot.core;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public class Candle {
 
     public String date;
@@ -28,6 +32,12 @@ public class Candle {
 
     public String getDate() {
         return date;
+    }
+
+    public long getDateMillis() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        LocalDateTime ldt = LocalDateTime.parse(this.date, formatter);
+        return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     public double getBodyHeight() {

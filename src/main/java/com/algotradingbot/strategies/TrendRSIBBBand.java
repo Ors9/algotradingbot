@@ -12,14 +12,22 @@ import com.algotradingbot.utils.TrendUtils;
 
 public class TrendRSIBBBand extends TradingStrategy {
 
-    private final int MIN_CANDLES_FOR_STRATEGY = 300;
+    private final int MIN_CANDLES_FOR_STRATEGY = 200;
     private final int BOLLINGER_PERIOD = 20;
     private final int RSI_PERIOD = 14;
+
+    private int countInvalidTrend = 0;
+    private int countInvalidBB = 0;
+    private int countInvalidTime = 0;
+    private int countInvalidRSI = 0;
+    private int countInvalidBodyOrColor = 0;
+    private int countInvalidPattern = 0;
+    private int countValidSignals = 0;
 
     public TrendRSIBBBand(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 5;
+        this.riskReward = 2;
     }
 
     @Override
@@ -32,48 +40,58 @@ public class TrendRSIBBBand extends TradingStrategy {
             }
         }
 
-
+        System.out.println("=== סיכום DEBUG ===");
+        System.out.println("📉 מגמה לא תקינה:         " + countInvalidTrend);
+        System.out.println("📉 לא נגע ב-BB:            " + countInvalidBB);
+        System.out.println("⏰ זמן לא מסחרי:          " + countInvalidTime);
+        System.out.println("📊 RSI גבוה מדי:          " + countInvalidRSI);
+        System.out.println("🕯️ גוף חלש / נר לא ירוק: " + countInvalidBodyOrColor);
+        System.out.println("📉 בלי תבנית היפוך:       " + countInvalidPattern);
+        System.out.println("✅ עסקאות שעברו הכל:       " + countValidSignals);
     }
 
     private boolean strategyValid(int index) {
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
 
-        // מגמה פשוטה בלבד
         /*if (!TrendUtils.isShortTermUptrendHolding(candles, index, 20, 50, 200)) {
+            countInvalidTrend++;
             return false;
-        }*/
-        // BB pullback zone
+        }
+         */
+        if (!TrendUtils.isBullishEnough(candles, index)) {
+            countInvalidTrend++;
+            return false;
+        }
+
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        double distanceFromLower = (curr.getClose() - bb.lower) / (bb.upper - bb.lower);
-        if (distanceFromLower > 0.7) {
+        if (curr.getLow() >= bb.lower * 1.01) {
+            countInvalidBB++;
             return false;
         }
 
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
+            countInvalidTime++;
             return false;
         }
 
-        if (!CandleUtils.hasStrongBody(curr)) {
-            return false;
-        }
-
-        if (!CandleUtils.isGreen(curr)) {
-            return false;
-        }
-
-        // RSI גמיש יותר
         double rsi = TrendUtils.calculateRSI(candles, index, 14);
-        if (rsi > 60 || rsi < 20) {
+        if (rsi < 38 || rsi > 50) {
+            countInvalidRSI++;
             return false;
         }
 
-        // תבניות נר – רק אם ממש חשוב
-        if (!CandleUtils.isHammer(curr)
-                && !CandleUtils.isBullishEngulfing(prev, curr)) {
+        if (!CandleUtils.hasStrongBody(curr) || !CandleUtils.isGreen(curr)) {
+            countInvalidBodyOrColor++;
             return false;
         }
 
+        if (!(CandleUtils.isHammer(curr) || CandleUtils.isBullishEngulfing(prev, curr))) {
+            countInvalidPattern++;
+            return false;
+        }
+
+        countValidSignals++;
         return true;
     }
 

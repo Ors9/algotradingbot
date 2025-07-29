@@ -25,6 +25,7 @@ public class ChartBuilder {
     public static JFreeChart buildFullChart(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf) {
         // יצירת תתי גרפים (נרות, ווליום, RSI)
         XYPlot candlePlot = PlotFactory.createCandlePlot(candles);
+
         XYPlot volumePlot = PlotFactory.createVolumePlot(candles);
         XYPlot rsiPlot = PlotFactory.createRSIPlot(candles);
 
@@ -36,6 +37,8 @@ public class ChartBuilder {
         timeAxis.setTickMarkPosition(DateTickMarkPosition.MIDDLE); // אופציונלי
         timeAxis.setLowerMargin(0.05);
         timeAxis.setUpperMargin(0.05);
+        timeAxis.setTickLabelsVisible(true);
+        timeAxis.setVerticalTickLabels(true); // אם התאריכים עולים אחד על השני
 
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(timeAxis);
         combinedPlot.add(candlePlot, 5);
@@ -94,4 +97,5 @@ public class ChartBuilder {
         panel.setPreferredSize(new Dimension(1600, 800));
         return panel;
     }
+    
 }

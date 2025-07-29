@@ -16,14 +16,15 @@ public class TrendUtils {
     public static final double RSI_OVERSOLD = 30.0;
     public static final double RSI_OVERBOUGHT = 70.0;
 
-    public static boolean isShortTermUptrendHolding(ArrayList<Candle> candles, int index, int smaShortPeriod, int smaMidPeriod , int smaLargePeriod) {
+    public static boolean isShortTermUptrendHolding(ArrayList<Candle> candles, int index, int smaShortPeriod, int smaMidPeriod, int smaLargePeriod) {
         try {
-            double smaShort = calculateSMA(candles, index, smaShortPeriod);
-            double smaMid = calculateSMA(candles, index, smaMidPeriod);
-            double smaLarge = calculateSMA(candles, index, smaLargePeriod);
-            double close = candles.get(index).getClose();
+            double smaShort = calculateSMA(candles, index, smaShortPeriod); // e.g., 20
+            double smaMid = calculateSMA(candles, index, smaMidPeriod);     // e.g., 50
+            double smaLarge = calculateSMA(candles, index, smaLargePeriod); // e.g., 200
 
-            return smaShort > smaMid && close > smaLarge;
+            // מגמה שורית פשוטה: SMA20 > SMA50 > SMA200
+            //&& smaMid > smaLarge leave for now
+            return smaShort > smaMid;
         } catch (Exception e) {
             return false;
         }
@@ -37,6 +38,16 @@ public class TrendUtils {
             double price = candles.get(index).getClose();
 
             return sma20Val > sma50Val && sma50Val > sma200Val && price > sma20Val;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static boolean isBullishEnough(ArrayList<Candle> candles, int index) {
+        try {
+            double sma20 = calculateSMA(candles, index, 20);
+            double sma50 = calculateSMA(candles, index, 50);
+            return sma20 > sma50 * 0.995; // טולרנס של 0.5%
         } catch (Exception e) {
             return false;
         }
