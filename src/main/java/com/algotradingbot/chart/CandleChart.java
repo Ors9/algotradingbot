@@ -49,7 +49,7 @@ public class CandleChart extends JFrame {
         candlePlot.setDomainPannable(true);  // מאפשר פאן בציר X (זמן)
         candlePlot.setRangePannable(true);   // מאפשר פאן בציר Y (מחיר)
 
-        AnnotationUtils.addSignalAnnotations(candlePlot, candles, signals); // תעביר לו את זה
+        //AnnotationUtils.addSignalAnnotations(candlePlot, candles, signals); // תעביר לו את זה
         AnnotationUtils.addTradeAnnotations(candlePlot, candles, signals);
 
         ChartPanel chartPanel = createInteractivePanel(chart, candlePlot, candles);

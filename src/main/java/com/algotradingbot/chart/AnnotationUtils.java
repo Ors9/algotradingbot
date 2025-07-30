@@ -79,12 +79,16 @@ public class AnnotationUtils {
             entryArrow.setFont(new Font("Arial", Font.BOLD, 12));
             plot.addAnnotation(entryArrow);
 
-            // טקסט מעל חץ כניסה - מידע מפורט
-            String entryInfo = String.format("Entry: %.2f\nTP: %.2f\nStop: %.2f",
-                    signal.getEntryPrice(), signal.getTpPrice(), signal.getStopPrice());
+            // הוסף טקסט של WIN או LOSS בצבע מתאים
+            String winLossText = signal.isWinSignal() ? "WIN" : "LOSS";
+            Color winLossColor = signal.isWinSignal() ? Color.GREEN.darker() : Color.RED.darker();
+
+            // טקסט מעל חץ כניסה - מידע מפורט כולל WIN/LOSS
+            String entryInfo = String.format("Entry: %.2f | TP: %.2f | Stop: %.2f | %s",
+                    signal.getEntryPrice(), signal.getTpPrice(), signal.getStopPrice(), winLossText);
             XYTextAnnotation entryText = new XYTextAnnotation(entryInfo, x, signal.getEntryPrice() + 0.5);
             entryText.setFont(new Font("Arial", Font.PLAIN, 10));
-            entryText.setPaint(Color.BLACK);
+            entryText.setPaint(winLossColor);
             entryText.setTextAnchor(org.jfree.chart.ui.TextAnchor.BOTTOM_CENTER);
             plot.addAnnotation(entryText);
 
@@ -111,7 +115,7 @@ public class AnnotationUtils {
             tpArrow.setFont(new Font("Arial", Font.BOLD, 12));
             plot.addAnnotation(tpArrow);
 
-            // אפשר להוסיף טקסט ל-TP במידת הצורך, למשל מתחת או מעל
+            // אפשר להוסיף טקסט ל-TP במידת הצורך
         }
     }
 
