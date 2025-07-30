@@ -100,12 +100,7 @@ public class AnnotationUtils {
             stopArrow.setFont(new Font("Arial", Font.BOLD, 12));
             plot.addAnnotation(stopArrow);
 
-            // טקסט מתחת לחץ סטופ
-            XYTextAnnotation stopText = new XYTextAnnotation("Stop Loss", x, signal.getStopPrice() - 0.5);
-            stopText.setFont(new Font("Arial", Font.PLAIN, 10));
-            stopText.setPaint(Color.RED.darker());
-            stopText.setTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_CENTER);
-            plot.addAnnotation(stopText);
+
 
             // Take Profit - חץ ירוק למעלה עם טקסט "TP"
             XYPointerAnnotation tpArrow = new XYPointerAnnotation(

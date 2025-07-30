@@ -68,6 +68,31 @@ public class TrendUtils {
         }
     }
 
+    public static boolean isBearishEnough(ArrayList<Candle> candles, int index) {
+        try {
+            double close = candles.get(index).getClose();
+            double sma20 = calculateSMA(candles, index, 20);
+            double sma50 = calculateSMA(candles, index, 50);
+            double sma100 = calculateSMA(candles, index, 100);
+
+            int countBelow = 0;
+            if (close < sma20 * 1.01) {
+                countBelow++;
+            }
+            if (close < sma50 * 1.01) {
+                countBelow++;
+            }
+            if (close < sma100 * 1.01) {
+                countBelow++;
+            }
+
+            // דרוש לפחות 2 מתוך 3
+            return countBelow >= 2;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static double averageVolume(ArrayList<Candle> candles, int startIndex, int period) {
         if (startIndex - period + 1 < 0) {
             throw new IllegalArgumentException("Not enough candles for volume average");

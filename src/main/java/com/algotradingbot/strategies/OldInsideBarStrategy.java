@@ -45,7 +45,7 @@ public class OldInsideBarStrategy extends TradingStrategy {
         double positionSize = riskPerTradeUSD / riskPerUnit;
         double tp = entry + (riskReward * riskPerUnit);
 
-        return new Signal(index, entry, tp, sl, positionSize);
+        return new Signal(index, entry, tp, sl, positionSize , true);
     }
 
     public boolean strategyInsideBar(Candle prev, Candle curr, int index) {

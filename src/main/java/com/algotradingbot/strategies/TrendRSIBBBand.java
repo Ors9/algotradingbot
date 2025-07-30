@@ -10,6 +10,13 @@ import com.algotradingbot.utils.CandleUtils;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
+/*
+ * Period: 01/01/2021 ? 01/01/2025
+ * Results for Strategy:
+W:20  | L:13  | WinRate: 60.61% | Profit: $  869.25 | MaxDD: $   44.92
+last result
+ * 
+ */
 public class TrendRSIBBBand extends TradingStrategy {
 
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
@@ -33,9 +40,14 @@ public class TrendRSIBBBand extends TradingStrategy {
     @Override
     public void runBackTest() {
         for (int i = MIN_CANDLES_FOR_STRATEGY; i < candles.size(); i++) {
-            if (strategyValid(i)) {
+            if (strategyValidLong(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createBuySignal(i, curr); // שיטה קיימת מה־TradingStrategy
+                signals.add(signal);
+            }
+            if (strategyValidShort(i)) {
+                Candle curr = candles.get(i);
+                Signal signal = createSellSignal(i, curr); // שיטה קיימת מה־TradingStrategy
                 signals.add(signal);
             }
         }
@@ -50,7 +62,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         System.out.println("Signals that passed all: " + countValidSignals);
     }
 
-    private boolean strategyValid(int index) {
+    private boolean strategyValidLong(int index) {
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
 
@@ -99,6 +111,75 @@ public class TrendRSIBBBand extends TradingStrategy {
         return true;
     }
 
+    private boolean strategyValidShort(int index) {
+        Candle curr = candles.get(index);
+        Candle prev = candles.get(index - 1);
+
+        if (!TrendUtils.isBearishEnough(candles, index)) {
+            countInvalidTrend++;
+            return false;
+        }
+
+        BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
+        BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD + 5);
+
+        double touchThresholdSmall = bb.upper * 0.97;   // 3% מתחת לעליונה
+        double touchThresholdBig = bbBig.upper * 0.95;  // 5% מתחת לעליונה הגדולה
+
+        // אם הנר הנוכחי לא נוגע ברצועות העליונות (או לא קרוב), נפסול
+        if (curr.getHigh() < touchThresholdSmall && curr.getHigh() < touchThresholdBig) {
+            countInvalidBB++;
+            return false;
+        }
+
+        if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
+            countInvalidTime++;
+            return false;
+        }
+
+        double avgRsiLast10 = TrendUtils.averageRSI(candles, index - 11, 11);
+        double rsi = TrendUtils.calculateRSI(candles, index, 14);
+        double rsiBig = TrendUtils.calculateRSI(candles, index, 21);
+
+        // נרצה ש־RSI יהיה גבוה כדי לחפש תיקון כלפי מטה
+        if ((rsi < avgRsiLast10 + 9) && (rsiBig < 60)) {
+            countInvalidRSI++;
+            return false;
+        }
+
+        if (!CandleUtils.hasStrongBody(curr) || !Candle.isRed(curr)) {
+            countInvalidBodyOrColor++;
+            return false;
+        }
+
+        if (!(CandleUtils.isShootingStar(curr) || CandleUtils.isBearishEngulfing(prev, curr))) {
+            countInvalidPattern++;
+            return false;
+        }
+
+        countValidSignals++;
+        return true;
+    }
+
+    private Signal createSellSignal(int index, Candle curr) {
+        double entryBuffer = 20;
+        double lowPrice = curr.getLow();
+        double highPrice = curr.getHigh();
+
+        double entryPrice = lowPrice - entryBuffer;
+        double stopLossPrice = highPrice + (highPrice * 0.01);
+        double riskPerUnit = stopLossPrice - entryPrice;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+        double takeProfitPrice = entryPrice - (riskReward * riskPerUnit);
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize , false);
+    }
+
     private Signal createBuySignal(int index, Candle curr) {
         // קבוע המייצג מרחק כניסה מעל השיא (מחיר במטבע)
         double entryBuffer = 20;
@@ -128,6 +209,6 @@ public class TrendRSIBBBand extends TradingStrategy {
         double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
 
         // מחזיר את אובייקט הסיגנל עם כל הנתונים
-        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize);
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 }

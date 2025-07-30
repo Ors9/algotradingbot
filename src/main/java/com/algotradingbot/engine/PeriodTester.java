@@ -30,37 +30,37 @@ public class PeriodTester {
 
     public static void runTestsForMultiplePeriods(String symbol, String interval) {
         long[][] crisisPeriods = {
-            {1580515200000L, 1585699200000L}, // פברואר–מרץ 2020
-            {1604188800000L, 1609459200000L}, // נובמבר–דצמבר 2020
-            {1646092800000L, 1648771200000L}, // מרץ 2022
-            {1672444800000L, 1675123200000L}, // ינואר 2023
+            {1563235200000L, 1602979200000L}, // אוגוסט 2019 – אוקטובר 2020
+            {1583020800000L, 1615766400000L}, // מרץ 2020 – מרץ 2021
+            {1624406400000L, 1657152000000L}, // יולי 2021 – יולי 2022
+            {1644854400000L, 1677600000000L}, // פברואר 2022 – פברואר 2023
         };
 
         long[][] dashMarketPeriods = {
-            {1685923200000L, 1687737600000L} // 5–26 ביוני 2023 (XRPUSDT היה בריינג' אופייני)
+            {1670198400000L, 1702944000000L} // דצמבר 2022 – דצמבר 2023
         };
 
         long[][] bullMarketPeriods = {
-            {1601510400000L, 1604188800000L}, // אוקטובר 2020
-            {1612137600000L, 1614556800000L}, // פברואר 2021
+            {1596240000000L, 1628985600000L}, // אוגוסט 2020 – אוגוסט 2021
+            {1609459200000L, 1642204800000L}, // ינואר 2021 – ינואר 2022
         };
 
         long[][] bearMarketPeriods = {
-            {1622505600000L, 1625097600000L}, // יוני 2021
-            {1654041600000L, 1656633600000L}, // יוני 2022
+            {1617235200000L, 1649980800000L}, // אפריל 2021 – אפריל 2022
+            {1636761600000L, 1669507200000L}, // נובמבר 2021 – נובמבר 2022
         };
 
         long[][] normalPeriods = {
-            {1680307200000L, 1682899200000L}, // אפריל–יוני 2023
-            {1704067200000L, 1706745600000L}, // ינואר 2024
-            {1711929600000L, 1714608000000L}, // אפריל 2024
+            {1665014400000L, 1697760000000L}, // אוקטובר 2022 – אוקטובר 2023
+            {1686787200000L, 1719532800000L}, // יוני 2023 – יוני 2024
+            {1694649600000L, 1727395200000L}, // ספטמבר 2023 – ספטמבר 2024
         };
 
         Performance all = new Performance(0, 0, 0, 0);
 
-        //all = all.add(runPeriodGroup(" Corona Time crisisPeriods", crisisPeriods, symbol, interval));
-        //all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
-        //all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
+        all = all.add(runPeriodGroup(" Corona Time crisisPeriods", crisisPeriods, symbol, interval));
+        all = all.add(runPeriodGroup(" Bull period up market", bullMarketPeriods, symbol, interval));
+        all = all.add(runPeriodGroup(" Bear market down market ", bearMarketPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Regular market ", normalPeriods, symbol, interval));
         all = all.add(runPeriodGroup(" Dash Market - Flat Range XRP", dashMarketPeriods, symbol, interval));
 
@@ -120,7 +120,7 @@ public class PeriodTester {
         TrendRSIBBBand strategy = new TrendRSIBBBand(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
-        //strategy.printSignals();
+        strategy.printSignals();
         Performance perf = strategy.evaluatePerformance();
         CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf);
         return strategy.evaluatePerformance();

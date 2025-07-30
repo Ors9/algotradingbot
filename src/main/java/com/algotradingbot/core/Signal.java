@@ -9,15 +9,17 @@ public class Signal {
     private final double stopPrice;
     private final double tpPrice;
     private final double posSize20USD;
+    private final boolean isLong;
     private boolean winSignal;      // true = הצלחה, false = כישלון
     private boolean evaluated;      // האם נותח כבר
 
-    public Signal(int index, double entryPrice, double tpPrice, double stopPrice, double riskUsd) {
+    public Signal(int index, double entryPrice, double tpPrice, double stopPrice, double riskUsd, boolean isLong) {
         this.indexInCandleList = index;
         this.entryPrice = entryPrice;
         this.tpPrice = tpPrice;
         this.stopPrice = stopPrice;
         this.evaluated = false;
+        this.isLong = isLong;
 
         double riskPerUnit = Math.abs(entryPrice - stopPrice);
         this.posSize20USD = riskPerUnit > 0 ? riskUsd / riskPerUnit : 0;
@@ -25,6 +27,10 @@ public class Signal {
 
     public double getPosSize20USD() {
         return posSize20USD;
+    }
+
+    public boolean isLong() {
+        return isLong;
     }
 
     // ===== Getters & Setters =====
@@ -66,24 +72,36 @@ public class Signal {
                 + ", stopPrice=" + stopPrice
                 + ", winSignal=" + winSignal
                 + ", evaluated=" + evaluated
+                + ", isLong= " + isLong
                 + '}';
     }
 
     public void evaluateSignal(Signal signal, ArrayList<Candle> candles) {
         int startIndex = signal.getIndex();
+
         for (int i = startIndex; i < candles.size(); i++) {
             Candle c = candles.get(i);
 
-            if (c.getHigh() >= signal.getTpPrice()) {
-                signal.setWinSignal(true);
-                return;
-            } else if (c.getLow() <= signal.getStopPrice()) {
-                signal.setWinSignal(false);
-                return;
+            if (signal.isLong()) {
+                // LONG: רוצים שהמחיר יעלה
+                if (c.getHigh() >= signal.getTpPrice()) {
+                    signal.setWinSignal(true);
+                    return;
+                } else if (c.getLow() <= signal.getStopPrice()) {
+                    signal.setWinSignal(false);
+                    return;
+                }
+            } else {
+                // SHORT: רוצים שהמחיר ירד
+                if (c.getLow() <= signal.getTpPrice()) {
+                    signal.setWinSignal(true);
+                    return;
+                } else if (c.getHigh() >= signal.getStopPrice()) {
+                    signal.setWinSignal(false);
+                    return;
+                }
             }
         }
     }
-
-    
 
 }

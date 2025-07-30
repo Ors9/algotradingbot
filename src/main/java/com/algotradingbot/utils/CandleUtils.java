@@ -22,6 +22,34 @@ public class CandleUtils {
         return Math.abs(c.getClose() - c.getOpen()) / range >= 0.55;
     }
 
+    public static boolean isShootingStar(Candle c) {
+        double open = c.getOpen();
+        double close = c.getClose();
+        double high = c.getHigh();
+        double low = c.getLow();
+
+        double body = Math.abs(close - open);
+        double upperShadow = high - Math.max(open, close);
+        double lowerShadow = Math.min(open, close) - low;
+
+        // גוף קטן יחסית
+        boolean smallBody = body <= (high - low) * 0.3;
+
+        // צל עליון ארוך פי 2 לפחות מהגוף
+        boolean longUpperShadow = upperShadow >= body * 2;
+
+        // כמעט בלי צל תחתון
+        boolean smallLowerShadow = lowerShadow <= body * 0.2;
+
+        return smallBody && longUpperShadow && smallLowerShadow;
+    }
+
+    public static boolean isBearishEngulfing(Candle prev, Candle curr) {
+        return Candle.isRed(curr) && isGreen(prev)
+                && curr.getOpen() > prev.getClose()
+                && curr.getClose() < prev.getOpen();
+    }
+
     public static boolean isBullishEngulfing(Candle prev, Candle curr) {
         return (prev.getClose() < prev.getOpen())
                 && // נר קודם אדום
