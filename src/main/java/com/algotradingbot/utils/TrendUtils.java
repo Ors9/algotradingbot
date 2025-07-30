@@ -47,7 +47,7 @@ public class TrendUtils {
         try {
             double sma20 = calculateSMA(candles, index, 20);
             double sma50 = calculateSMA(candles, index, 50);
-            return sma20 > sma50 * 0.995; // טולרנס של 0.5%
+            return candles.get(index).getClose() > sma50 * 0.990; // טולרנס של 0.5%
         } catch (Exception e) {
             return false;
         }
