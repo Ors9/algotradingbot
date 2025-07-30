@@ -1,30 +1,30 @@
 package com.algotradingbot.chart;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor; // Make sure this is imported
+import java.awt.Dimension; // Optional for styling
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.BorderLayout; // Make sure this is imported
-import java.awt.Color; // Optional for styling
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import org.jfree.chart.axis.DateTickUnit;
-import org.jfree.chart.axis.DateTickUnitType;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.DateTickUnit;
+import org.jfree.chart.axis.DateTickUnitType;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
-
 import org.jfree.data.xy.DefaultHighLowDataset;
 
 import com.algotradingbot.core.Candle;
@@ -46,6 +46,8 @@ public class CandleChart extends JFrame {
         candlePlot.setBackgroundPaint(Color.WHITE);
         candlePlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
         candlePlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+        candlePlot.setDomainPannable(true);  // מאפשר פאן בציר X (זמן)
+        candlePlot.setRangePannable(true);   // מאפשר פאן בציר Y (מחיר)
 
         AnnotationUtils.addSignalAnnotations(candlePlot, candles, signals); // תעביר לו את זה
 
@@ -110,7 +112,6 @@ public class CandleChart extends JFrame {
 
     private DateAxis createTimeAxis(ArrayList<Candle> candles, int start, int end) {
         DateAxis axis = new DateAxis("Time");
-        axis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH:mm"));
         axis.setAutoRange(false);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -122,20 +123,27 @@ public class CandleChart extends JFrame {
                 Date.from(endLdt.atZone(ZoneId.systemDefault()).toInstant())
         );
 
-        // 🧠 חשב את סך הדקות בטווח
         long totalMinutes = Math.max(1, java.time.Duration.between(startLdt, endLdt).toMinutes());
-
-        // 🧠 כמה תוויות אנחנו רוצים בציר
         int targetLabelCount = 10;
-        long minutesPerTick = Math.max(1, totalMinutes / targetLabelCount); // ✅ הגנה מ־0
+        long minutesPerTick = Math.max(1, totalMinutes / targetLabelCount);
 
-        // ✅ קבע את יחידת הטיק לפי גודל
+        int tickCount;
         if (minutesPerTick < 60) {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.MINUTE, (int) minutesPerTick));
+            tickCount = Math.max(1, (int) minutesPerTick);
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.MINUTE, tickCount));
+            axis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH:mm"));
         } else if (minutesPerTick < 1440) {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.HOUR, (int) (minutesPerTick / 60)));
+            tickCount = Math.max(1, (int) (minutesPerTick / 60));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.HOUR, tickCount));
+            axis.setDateFormatOverride(new SimpleDateFormat("dd/MM HH"));
+        } else if (minutesPerTick < 43200) { // פחות מ-30 יום
+            tickCount = Math.max(1, (int) (minutesPerTick / 1440));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, tickCount));
+            axis.setDateFormatOverride(new SimpleDateFormat("dd/MM"));
         } else {
-            axis.setTickUnit(new DateTickUnit(DateTickUnitType.DAY, (int) (minutesPerTick / 1440)));
+            tickCount = Math.max(1, (int) (minutesPerTick / 43200));
+            axis.setTickUnit(new DateTickUnit(DateTickUnitType.MONTH, tickCount));
+            axis.setDateFormatOverride(new SimpleDateFormat("MM/yyyy"));
         }
 
         axis.setLowerMargin(0.01);
@@ -153,6 +161,7 @@ public class CandleChart extends JFrame {
 
     public static ChartPanel createInteractivePanel(JFreeChart chart, XYPlot candlePlot, ArrayList<Candle> candles) {
         ChartPanel panel = new ChartPanel(chart);
+
         panel.setMouseWheelEnabled(true);
         panel.setMouseZoomable(true);
         panel.setDomainZoomable(true);

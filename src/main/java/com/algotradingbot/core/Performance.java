@@ -2,11 +2,11 @@ package com.algotradingbot.core;
 
 public class Performance {
 
-    private int winCount;
-    private int lossCount;
-    private double winRate;
-    private double totalProfit;
-    private double maxDrawdown;
+    private final int winCount;
+    private final int lossCount;
+    private final double winRate;
+    private final double totalProfit;
+    private final double maxDrawdown;
 
     // Constructor
     public Performance(int winCount, int lossCount, double totalProfit, double maxDrawdown) {

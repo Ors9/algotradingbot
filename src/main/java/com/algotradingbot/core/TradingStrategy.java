@@ -2,7 +2,6 @@ package com.algotradingbot.core;
 
 import java.util.ArrayList;
 
-import javax.swing.SwingUtilities;
 
 public abstract class TradingStrategy {
 
