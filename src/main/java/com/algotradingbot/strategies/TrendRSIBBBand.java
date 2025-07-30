@@ -27,7 +27,7 @@ public class TrendRSIBBBand extends TradingStrategy {
     public TrendRSIBBBand(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 2.5;
+        this.riskReward = 3;
     }
 
     @Override
