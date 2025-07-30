@@ -7,6 +7,7 @@ import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.BollingerBands;
 import com.algotradingbot.utils.CandleUtils;
+import com.algotradingbot.utils.FilterRejectionTracker;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
@@ -22,19 +23,13 @@ public class TrendRSIBBBand extends TradingStrategy {
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
     private final int BOLLINGER_PERIOD = 20;
     private final int RSI_PERIOD = 14;
-
-    private int countInvalidTrend = 0;
-    private int countInvalidBB = 0;
-    private int countInvalidTime = 0;
-    private int countInvalidRSI = 0;
-    private int countInvalidBodyOrColor = 0;
-    private int countInvalidPattern = 0;
-    private int countValidSignals = 0;
+    private FilterRejectionTracker tracker;
 
     public TrendRSIBBBand(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
         this.riskReward = 3;
+        tracker = new FilterRejectionTracker();
     }
 
     @Override
@@ -52,22 +47,16 @@ public class TrendRSIBBBand extends TradingStrategy {
             }
         }
 
-        System.out.println("=== DEBUG SUMMARY ===");
-        System.out.println("Invalid trend:           " + countInvalidTrend);
-        System.out.println("Did not touch BB:        " + countInvalidBB);
-        System.out.println("Non-trading time:        " + countInvalidTime);
-        System.out.println("RSI too high:            " + countInvalidRSI);
-        System.out.println("Weak body / not green:   " + countInvalidBodyOrColor);
-        System.out.println("No reversal pattern:     " + countInvalidPattern);
-        System.out.println("Signals that passed all: " + countValidSignals);
+        tracker.print();
     }
 
     private boolean strategyValidLong(int index) {
+        tracker.incrementTotal(true);
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
 
         if (!TrendUtils.isBullishEnough(candles, index)) {
-            countInvalidTrend++;
+            tracker.incrementTrend(true);
             return false;
         }
 
@@ -78,12 +67,12 @@ public class TrendRSIBBBand extends TradingStrategy {
         double touchThresholdBig = bbBig.lower * 1.05; // 5% מעל התחתון הגדול
 
         if (curr.getLow() > touchThresholdSmall || curr.getLow() > touchThresholdBig) {
-            countInvalidBB++;
+            tracker.incrementBB(true);
             return false;
         }
 
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
-            countInvalidTime++;
+            tracker.incrementTime(true);
             return false;
         }
 
@@ -93,30 +82,30 @@ public class TrendRSIBBBand extends TradingStrategy {
         double rsiBig = TrendUtils.calculateRSI(candles, index, 21);
 
         if ((rsi > avgRsiLast10 - 9) && (rsiBig > 40)) {
-            countInvalidRSI++;
+            tracker.incrementRSI(true);
             return false;
         }
 
         if (!CandleUtils.hasStrongBody(curr) || !CandleUtils.isGreen(curr)) {
-            countInvalidBodyOrColor++;
+            tracker.incrementCandle(true);
             return false;
         }
 
         if (!(CandleUtils.isHammer(curr) || CandleUtils.isBullishEngulfing(prev, curr))) {
-            countInvalidPattern++;
+            tracker.incrementPattern(true);
             return false;
         }
 
-        countValidSignals++;
         return true;
     }
 
     private boolean strategyValidShort(int index) {
+        tracker.incrementTotal(false);
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
 
         if (!TrendUtils.isBearishEnough(candles, index)) {
-            countInvalidTrend++;
+            tracker.incrementTrend(false);
             return false;
         }
 
@@ -128,12 +117,12 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         // אם הנר הנוכחי לא נוגע ברצועות העליונות (או לא קרוב), נפסול
         if (curr.getHigh() < touchThresholdSmall || curr.getHigh() < touchThresholdBig) {
-            countInvalidBB++;
+            tracker.incrementBB(false);
             return false;
         }
 
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {
-            countInvalidTime++;
+            tracker.incrementTime(false);
             return false;
         }
 
@@ -143,21 +132,20 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         // נרצה ש־RSI יהיה גבוה כדי לחפש תיקון כלפי מטה
         if ((rsi < avgRsiLast10 + 9) && (rsiBig < 70)) {
-            countInvalidRSI++;
+            tracker.incrementRSI(false);
             return false;
         }
 
         if (!CandleUtils.hasStrongBody(curr) || !Candle.isRed(curr)) {
-            countInvalidBodyOrColor++;
+            tracker.incrementCandle(false);
             return false;
         }
 
         if (!(CandleUtils.isShootingStar(curr) || CandleUtils.isBearishEngulfing(prev, curr))) {
-            countInvalidPattern++;
+            tracker.incrementPattern(false);
             return false;
         }
 
-        countValidSignals++;
         return true;
     }
 

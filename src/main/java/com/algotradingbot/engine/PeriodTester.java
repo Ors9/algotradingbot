@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 import com.algotradingbot.chart.CandleChart;
-import com.algotradingbot.core.Performance;
 import com.algotradingbot.core.StrategyPerformance;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
 import com.algotradingbot.strategies.TrendRSIBBBand;
@@ -136,7 +135,7 @@ public class PeriodTester {
         TrendRSIBBBand strategy = new TrendRSIBBBand(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
-        strategy.printSignals();
+        //strategy.printSignals();
         StrategyPerformance perf = strategy.evaluatePerformance();
         CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
         return strategy.evaluatePerformance();
