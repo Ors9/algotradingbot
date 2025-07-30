@@ -60,8 +60,12 @@ public class TrendRSIBBBand extends TradingStrategy {
         }
 
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        double touchThreshold = bb.lower * 1.03; // רק 2% מעל התחתון
-        if (curr.getLow() > touchThreshold) {
+        BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD + 5);
+
+        double touchThresholdSmall = bb.lower * 1.03;   // 3% מעל התחתון
+        double touchThresholdBig = bbBig.lower * 1.05; // 5% מעל התחתון הגדול
+
+        if (curr.getLow() > touchThresholdSmall || curr.getLow() > touchThresholdBig) {
             countInvalidBB++;
             return false;
         }
@@ -76,7 +80,7 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         double rsiBig = TrendUtils.calculateRSI(candles, index, 21);
 
-        if ( (rsi > avgRsiLast10 - 9) && (rsiBig > 40) ) {
+        if ((rsi > avgRsiLast10 - 9) && (rsiBig > 40)) {
             countInvalidRSI++;
             return false;
         }
