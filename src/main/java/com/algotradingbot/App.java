@@ -6,12 +6,11 @@ public class App {
 
     public static void main(String[] args) {
         //PeriodTester.runTestsForMultiplePeriods("BTCUSDT", "15m");
-        //PeriodTester.runTestsForMultiplePeriods("BTCUSDT", "1h");
-        long start = 1609459200000L; // 2021-01-01 00:00:00 UTC
-        long end = 1735689600000L; // 2026-01-01 00:00:00 UTC
-        PeriodTester.runSinglePeriodTest("BTCUSDT", "1h", start, end);
+        PeriodTester.runTestsForMultiplePeriods("BTCUSDT", "1h");
+        long start = 1483228800000L; // 2017-01-01 00:00:00 UTC
+        long end = System.currentTimeMillis(); // עכשיו
+        //PeriodTester.runSinglePeriodTest("BTCUSDT", "1h", start, end);
 
-  
     }
 
 }

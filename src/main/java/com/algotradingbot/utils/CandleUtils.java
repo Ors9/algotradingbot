@@ -96,4 +96,39 @@ public class CandleUtils {
         double range = c.getHigh() - c.getLow();
         return body <= 0.1 * range;
     }
+
+    public static boolean isEveningStar(Candle prev2, Candle prev1, Candle curr) {
+        if (!isGreen(prev2) || !hasStrongBody(prev2)) {
+            return false;
+        }
+
+        boolean smallBody = Math.abs(prev1.getClose() - prev1.getOpen())
+                < 0.5 * Math.abs(prev2.getClose() - prev2.getOpen());
+
+        boolean gapUp = prev1.getLow() > prev2.getHigh();
+        boolean redCloseBelowHalf = Candle.isRed(curr)
+                && curr.getClose() < (prev2.getOpen() + prev2.getClose()) / 2;
+
+        return smallBody && gapUp && redCloseBelowHalf;
+    }
+
+    public static boolean isThreeBlackCrows(Candle c1, Candle c2, Candle c3) {
+        if (!Candle.isRed(c1) || !hasStrongBody(c1)) {
+            return false;
+        }
+        if (!Candle.isRed(c2) || !hasStrongBody(c2)) {
+            return false;
+        }
+        if (!Candle.isRed(c3) || !hasStrongBody(c3)) {
+            return false;
+        }
+
+        boolean opensWithinPrev = c2.getOpen() < c1.getOpen() && c2.getOpen() > c1.getClose()
+                && c3.getOpen() < c2.getOpen() && c3.getOpen() > c2.getClose();
+
+        boolean closesLower = c2.getClose() < c1.getClose() && c3.getClose() < c2.getClose();
+
+        return opensWithinPrev && closesLower;
+    }
+
 }

@@ -40,11 +40,12 @@ public class TrendRSIBBBand extends TradingStrategy {
                 Signal signal = createBuySignal(i, curr); // שיטה קיימת מה־TradingStrategy
                 signals.add(signal);
             }
-            if (strategyValidShort(i)) {
+            /*Doesnt Suit for Short!!!!!!! */
+            /*if (strategyValidShort(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createSellSignal(i, curr); // שיטה קיימת מה־TradingStrategy
                 signals.add(signal);
-            }
+            }*/
         }
 
         tracker.print();
@@ -109,14 +110,14 @@ public class TrendRSIBBBand extends TradingStrategy {
             return false;
         }
 
+        // נבדוק פריצה של רצועת עליונה ואז חזרה
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD + 5);
+        double upper = bb.upper;
 
-        double touchThresholdSmall = bb.upper * 0.97;   // 3% מתחת לעליונה
-        double touchThresholdBig = bbBig.upper * 0.95;  // 5% מתחת לעליונה הגדולה
+        boolean fakeout = prev.getHigh() > upper && curr.getClose() < upper;
+        boolean touchesUpper = curr.getHigh() >= upper * 0.97;
 
-        // אם הנר הנוכחי לא נוגע ברצועות העליונות (או לא קרוב), נפסול
-        if (curr.getHigh() < touchThresholdSmall || curr.getHigh() < touchThresholdBig) {
+        if (!fakeout && !touchesUpper) {
             tracker.incrementBB(false);
             return false;
         }
@@ -126,26 +127,26 @@ public class TrendRSIBBBand extends TradingStrategy {
             return false;
         }
 
-        double avgRsiLast10 = TrendUtils.averageRSI(candles, index - 11, 11);
-        double rsi = TrendUtils.calculateRSI(candles, index, 14);
-        double rsiBig = TrendUtils.calculateRSI(candles, index, 21);
+        double rsi = TrendUtils.calculateRSI(candles, index, RSI_PERIOD);
 
-        // נרצה ש־RSI יהיה גבוה כדי לחפש תיקון כלפי מטה
-        if ((rsi < avgRsiLast10 + 9) && (rsiBig < 70)) {
+        // דרוש RSI גבוה יחסית לשורט (כדי לתפוס תיקון כלפי מטה)
+        if (rsi < 60) {
             tracker.incrementRSI(false);
             return false;
         }
 
+        // לוודא שהנר הנוכחי חזק, עם גוף ברור
         if (!CandleUtils.hasStrongBody(curr) || !Candle.isRed(curr)) {
             tracker.incrementCandle(false);
             return false;
         }
 
-        if (!(CandleUtils.isShootingStar(curr) || CandleUtils.isBearishEngulfing(prev, curr))) {
+        if (!(CandleUtils.isBearishEngulfing(prev, curr)
+                || CandleUtils.isEveningStar(candles.get(index - 2), prev, curr)
+                || CandleUtils.isThreeBlackCrows(candles.get(index - 2), prev, curr))) {
             tracker.incrementPattern(false);
             return false;
         }
-
         return true;
     }
 

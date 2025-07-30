@@ -29,6 +29,20 @@ public class PeriodTester {
     }
 
     public static void runTestsForMultiplePeriods(String symbol, String interval) {
+        long[][] parabolicBullRuns = {
+            {1512086400000L, 1514678400000L}, // דצמבר 2017 – שיא הביטקוין
+            {1604188800000L, 1612137600000L}, // נובמבר 2020 – פברואר 2021
+        };
+        long[][] flashCrashes = {
+            {1583971200000L, 1584230400000L}, // מרץ 2020 - נפילת קורונה תוך ימים
+            {1622505600000L, 1622764800000L}, // יוני 2021 – נפילה מ-40K ל-30K
+        };
+        long[][] longSidewaysPeriods = {
+            {1654041600000L, 1661990400000L}, // יוני – ספטמבר 2022
+        };
+        long[][] volatileShakeouts = {
+            {1640995200000L, 1646092800000L}, // ינואר – מרץ 2022 תנודות חזקות
+        };
         long[][] crisisPeriods = {
             {1563235200000L, 1602979200000L}, // אוגוסט 2019 – אוקטובר 2020
             {1583020800000L, 1615766400000L}, // מרץ 2020 – מרץ 2021
@@ -73,6 +87,19 @@ public class PeriodTester {
         all = all.add(group);
 
         group = runPeriodGroup(" Dash Market - Flat Range XRP", dashMarketPeriods, symbol, interval);
+        all = all.add(group);
+
+        group = runPeriodGroup("Parabolic Bull Runs", parabolicBullRuns, symbol, interval);
+        
+        all = all.add(group);
+
+        group = runPeriodGroup("Flash Crashes", flashCrashes, symbol, interval);
+        all = all.add(group);
+
+        group = runPeriodGroup("Sideways Low Volatility", longSidewaysPeriods, symbol, interval);
+        all = all.add(group);
+
+        group = runPeriodGroup("Volatile Shakeouts", volatileShakeouts, symbol, interval);
         all = all.add(group);
 
         System.out.println("\n ============OVERALL TOTAL PERFORMANCE ACROSS ALL PERIODS:=============");

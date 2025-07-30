@@ -92,20 +92,20 @@ public class FilterRejectionTracker {
 
         System.out.println("\n==== LONG trades:=====");
         System.out.printf("Total signals evaluated:   %d\n", totalEvaluatedLong);
-        System.out.printf("❌ Rejected by RSI:         %d\n", rejectedRSILong);
-        System.out.printf("❌ Rejected by Bollinger:   %d\n", rejectedBBLong);
-        System.out.printf("❌ Rejected by Trend:       %d\n", rejectedTrendLong);
-        System.out.printf("❌ Rejected by Pattern:     %d\n", rejectedPatternLong);
-        System.out.printf("❌ Rejected by Candle Body: %d\n", rejectedCandleLong);
-        System.out.printf("❌ Rejected by Time Filter: %d\n", rejectedTimeLong);
+        System.out.printf(" Rejected by RSI:         %d\n", rejectedRSILong);
+        System.out.printf(" Rejected by Bollinger:   %d\n", rejectedBBLong);
+        System.out.printf(" Rejected by Trend:       %d\n", rejectedTrendLong);
+        System.out.printf(" Rejected by Pattern:     %d\n", rejectedPatternLong);
+        System.out.printf(" Rejected by Candle Body: %d\n", rejectedCandleLong);
+        System.out.printf(" Rejected by Time Filter: %d\n", rejectedTimeLong);
 
         System.out.println("\n==== SHORT trades:====");
         System.out.printf("Total signals evaluated:   %d\n", totalEvaluatedShort);
-        System.out.printf("❌ Rejected by RSI:         %d\n", rejectedRSIShort);
-        System.out.printf("❌ Rejected by Bollinger:   %d\n", rejectedBBShort);
-        System.out.printf("❌ Rejected by Trend:       %d\n", rejectedTrendShort);
-        System.out.printf("❌ Rejected by Pattern:     %d\n", rejectedPatternShort);
-        System.out.printf("❌ Rejected by Candle Body: %d\n", rejectedCandleShort);
-        System.out.printf("❌ Rejected by Time Filter: %d\n", rejectedTimeShort);
+        System.out.printf(" Rejected by RSI:         %d\n", rejectedRSIShort);
+        System.out.printf(" Rejected by Bollinger:   %d\n", rejectedBBShort);
+        System.out.printf(" Rejected by Trend:       %d\n", rejectedTrendShort);
+        System.out.printf(" Rejected by Pattern:     %d\n", rejectedPatternShort);
+        System.out.printf(" Rejected by Candle Body: %d\n", rejectedCandleShort);
+        System.out.printf(" Rejected by Time Filter: %d\n", rejectedTimeShort);
     }
 }
