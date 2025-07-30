@@ -8,6 +8,52 @@ public class CandleUtils {
         return c.getClose() > c.getOpen();
     }
 
+    public static boolean isInvertedHammer(Candle candle) {
+        double body = Math.abs(candle.getClose() - candle.getOpen());
+        double upperShadow = candle.getHigh() - Math.max(candle.getClose(), candle.getOpen());
+        double lowerShadow = Math.min(candle.getClose(), candle.getOpen()) - candle.getLow();
+
+        // גוף קטן, צל עליון ארוך, צל תחתון קצר מאוד
+        return body > 0
+                && upperShadow >= 2 * body
+                && lowerShadow <= 0.1 * body;
+    }
+
+    public static boolean isTweezerBottom(Candle prev, Candle curr) {
+        if (!Candle.isRed(prev) || !isGreen(curr)) {
+            return false;
+        }
+
+        double low1 = prev.getLow();
+        double low2 = curr.getLow();
+        if (Math.abs(low1 - low2) > 0.008 * low1) { // שפל דומה ב־2.5%
+            return false;
+        }
+
+        // גוף בינוני או חזק לנר הירוק
+        if (!CandleUtils.hasStrongBody(curr)) {
+            return false;
+        }
+
+        // סגירה של הנר הירוק גבוהה מהסגירה הקודמת
+        if (curr.getClose() <= prev.getHigh() * 1.003) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isBullishHarami(Candle prev, Candle curr) {
+        if (!Candle.isRed(prev) || !isGreen(curr)) {
+            return false;
+        }
+
+        return curr.getOpen() > prev.getLow()
+                && curr.getClose() < prev.getHigh()
+                && curr.getOpen() < prev.getClose()
+                && curr.getClose() > prev.getOpen();
+    }
+
     public static boolean isAlmostGreen(Candle c) {
         double diff = c.getClose() - c.getOpen();
         double range = c.getHigh() - c.getLow();

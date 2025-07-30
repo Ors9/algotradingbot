@@ -41,7 +41,7 @@ public class TrendRSIBBBand extends TradingStrategy {
                 signals.add(signal);
             }
             /*Doesnt Suit for Short!!!!!!! */
-            /*if (strategyValidShort(i)) {
+ /*if (strategyValidShort(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createSellSignal(i, curr); // שיטה קיימת מה־TradingStrategy
                 signals.add(signal);
@@ -92,7 +92,9 @@ public class TrendRSIBBBand extends TradingStrategy {
             return false;
         }
 
-        if (!(CandleUtils.isHammer(curr) || CandleUtils.isBullishEngulfing(prev, curr))) {
+        if (!(CandleUtils.isHammer(curr)
+                || CandleUtils.isBullishEngulfing(prev, curr)
+                || CandleUtils.isTweezerBottom(prev, curr))) {
             tracker.incrementPattern(true);
             return false;
         }
@@ -170,34 +172,24 @@ public class TrendRSIBBBand extends TradingStrategy {
     }
 
     private Signal createBuySignal(int index, Candle curr) {
-        // קבוע המייצג מרחק כניסה מעל השיא (מחיר במטבע)
-        double entryBuffer = 20;
+        double entryBufferPct = 0.002; // 0.2% מעל השיא
+        double stopLossPct = 0.01;     // 1% מתחת לשפל
 
-        // מחירי השיא והשפל של הנר הנוכחי
         double highPrice = curr.getHigh();
         double lowPrice = curr.getLow();
 
-        // מחיר כניסה - 20 יחידות מעל השיא
-        double entryPrice = highPrice + entryBuffer;
+        double entryPrice = highPrice * (1 + entryBufferPct);
+        double stopLossPrice = lowPrice * (1 - stopLossPct);
 
-        // מחיר סטופ לוס - 1% מתחת לשפל
-        double stopLossPrice = lowPrice - (lowPrice * 0.01);
-
-        // חישוב הסיכון ליחידה (מרחק בין כניסה לסטופ)
         double riskPerUnit = entryPrice - stopLossPrice;
 
-        // אם הסיכון לא חיובי, אין טעם ליצור סיגנל
         if (riskPerUnit <= 0) {
             return null;
         }
 
-        // גודל הפוזיציה בחשבון (20 דולר סיכון מקסימלי)
         double positionSize = riskPerTradeUSD / riskPerUnit;
-
-        // מחיר היעד (Take Profit) לפי יחס סיכון-רווח
         double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
 
-        // מחזיר את אובייקט הסיגנל עם כל הנתונים
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 }
