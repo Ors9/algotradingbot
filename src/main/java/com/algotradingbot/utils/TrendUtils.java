@@ -45,9 +45,24 @@ public class TrendUtils {
 
     public static boolean isBullishEnough(ArrayList<Candle> candles, int index) {
         try {
+            double close = candles.get(index).getClose();
             double sma20 = calculateSMA(candles, index, 20);
             double sma50 = calculateSMA(candles, index, 50);
-            return candles.get(index).getClose() > sma50 * 0.990; // טולרנס של 0.5%
+            double sma100 = calculateSMA(candles, index, 100);
+
+            int countAbove = 0;
+            if (close > sma20 * 0.99) {
+                countAbove++;
+            }
+            if (close > sma50 * 0.99) {
+                countAbove++;
+            }
+            if (close > sma100 * 0.99) {
+                countAbove++;
+            }
+
+            // דרוש לפחות 2 מתוך 3
+            return countAbove >= 2;
         } catch (Exception e) {
             return false;
         }
