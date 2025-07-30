@@ -2,7 +2,6 @@ package com.algotradingbot.core;
 
 import java.util.ArrayList;
 
-
 public abstract class TradingStrategy {
 
     protected ArrayList<Candle> candles;
@@ -10,7 +9,7 @@ public abstract class TradingStrategy {
     protected double riskPerTradeUSD;
     protected double riskReward;
 
-    public TradingStrategy(ArrayList<Candle> candles ) {
+    public TradingStrategy(ArrayList<Candle> candles) {
         this.candles = candles;
         signals = new ArrayList<>();
     }
@@ -28,60 +27,78 @@ public abstract class TradingStrategy {
         return signals;
     }
 
-    public ArrayList<Candle> getCandles(){
+    public ArrayList<Candle> getCandles() {
         return candles;
     }
 
+    public StrategyPerformance evaluatePerformance() {
+        // Long performance variables
+        int longWins = 0, longLosses = 0;
+        double longProfit = 0, longBalance = 0, longPeak = 0, longMaxDD = 0;
 
+        // Short performance variables
+        int shortWins = 0, shortLosses = 0;
+        double shortProfit = 0, shortBalance = 0, shortPeak = 0, shortMaxDD = 0;
 
-    public Performance evaluatePerformance() {
-        int winCount = 0;
-        int lossCount = 0;
-        double totalProfit = 0;
-        double runningBalance = 0;
-        double peakBalance = 0;
-        double maxDrawdown = 0;
-
-        double commissionRate = 0.001; // 0.1% עמלה לכל צד
+        double commissionRate = 0.001; // 0.1%
 
         for (Signal signal : signals) {
-            if (signal.isEvaluated()) {
-                double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
-                if (stopSize == 0) {
-                    continue;
-                }
+            if (!signal.isEvaluated()) {
+                continue;
+            }
 
-                double positionSize = riskPerTradeUSD / stopSize;
+            double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
+            if (stopSize == 0) {
+                continue;
+            }
 
-                double entryPrice = signal.getEntryPrice();
-                double exitPrice = signal.isWinSignal()
-                        ? signal.getTpPrice()
-                        : signal.getStopPrice();
+            double positionSize = riskPerTradeUSD / stopSize;
 
-                double profitPerTrade = (exitPrice - entryPrice) * positionSize;
+            double entry = signal.getEntryPrice();
+            double exit = signal.isWinSignal() ? signal.getTpPrice() : signal.getStopPrice();
+            double profit;
 
-                // ✳️ חישוב עמלות
-                double entryCommission = entryPrice * positionSize * commissionRate;
-                double exitCommission = exitPrice * positionSize * commissionRate;
-                double totalCommission = entryCommission + exitCommission;
+            if (signal.isLong()) {
+                profit = (exit - entry) * positionSize;
+            } else {
+                profit = (entry - exit) * positionSize;
+            }
 
-                profitPerTrade -= totalCommission;
+            // Commission
+            double entryFee = entry * positionSize * commissionRate;
+            double exitFee = exit * positionSize * commissionRate;
+            profit -= (entryFee + exitFee);
 
-                // ✳️ עדכון ביצועים
-                runningBalance += profitPerTrade;
-                peakBalance = Math.max(peakBalance, runningBalance);
-                maxDrawdown = Math.max(maxDrawdown, peakBalance - runningBalance);
-                totalProfit += profitPerTrade;
+            // Update per direction
+            if (signal.isLong()) {
+                longBalance += profit;
+                longPeak = Math.max(longPeak, longBalance);
+                longMaxDD = Math.max(longMaxDD, longPeak - longBalance);
+                longProfit += profit;
 
                 if (signal.isWinSignal()) {
-                    winCount++;
-                } else {
-                    lossCount++;
+                    longWins++; 
+                }else {
+                    longLosses++;
+                }
+            } else {
+                shortBalance += profit;
+                shortPeak = Math.max(shortPeak, shortBalance);
+                shortMaxDD = Math.max(shortMaxDD, shortPeak - shortBalance);
+                shortProfit += profit;
+
+                if (signal.isWinSignal()) {
+                    shortWins++; 
+                }else {
+                    shortLosses++;
                 }
             }
         }
 
-        return new Performance(winCount, lossCount, totalProfit, maxDrawdown);
+        Performance longPerf = new Performance(longWins, longLosses, longProfit, longMaxDD);
+        Performance shortPerf = new Performance(shortWins, shortLosses, shortProfit, shortMaxDD);
+
+        return new StrategyPerformance(longPerf, shortPerf);
     }
 
     public void printSignals() {

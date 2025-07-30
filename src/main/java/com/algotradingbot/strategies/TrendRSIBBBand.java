@@ -127,7 +127,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         double touchThresholdBig = bbBig.upper * 0.95;  // 5% מתחת לעליונה הגדולה
 
         // אם הנר הנוכחי לא נוגע ברצועות העליונות (או לא קרוב), נפסול
-        if (curr.getHigh() < touchThresholdSmall && curr.getHigh() < touchThresholdBig) {
+        if (curr.getHigh() < touchThresholdSmall || curr.getHigh() < touchThresholdBig) {
             countInvalidBB++;
             return false;
         }
@@ -142,7 +142,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         double rsiBig = TrendUtils.calculateRSI(candles, index, 21);
 
         // נרצה ש־RSI יהיה גבוה כדי לחפש תיקון כלפי מטה
-        if ((rsi < avgRsiLast10 + 9) && (rsiBig < 60)) {
+        if ((rsi < avgRsiLast10 + 9) && (rsiBig < 70)) {
             countInvalidRSI++;
             return false;
         }
@@ -177,7 +177,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         double positionSize = riskPerTradeUSD / riskPerUnit;
         double takeProfitPrice = entryPrice - (riskReward * riskPerUnit);
 
-        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize , false);
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
     }
 
     private Signal createBuySignal(int index, Candle curr) {
