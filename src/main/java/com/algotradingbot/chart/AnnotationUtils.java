@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -50,6 +51,67 @@ public class AnnotationUtils {
             annotation.setTextAnchor(TextAnchor.CENTER);
 
             plot.addAnnotation(annotation);
+        }
+    }
+
+    public static void addTradeAnnotations(XYPlot plot, ArrayList<Candle> candles, ArrayList<Signal> signals) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        for (Signal signal : signals) {
+            if (!signal.isEvaluated()) {
+                continue;
+            }
+
+            int idx = signal.getIndex();
+            if (idx < 0 || idx >= candles.size()) {
+                continue;
+            }
+
+            Candle candle = candles.get(idx);
+            LocalDateTime ldt = LocalDateTime.parse(candle.getDate(), formatter);
+            double x = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()).getTime();
+
+            // Entry - חץ ירוק למעלה עם טקסט "Entry"
+            XYPointerAnnotation entryArrow = new XYPointerAnnotation(
+                    "Entry", x, signal.getEntryPrice(), Math.PI / 2);
+            entryArrow.setPaint(Color.GREEN.darker());
+            entryArrow.setArrowPaint(Color.GREEN.darker());
+            entryArrow.setFont(new Font("Arial", Font.BOLD, 12));
+            plot.addAnnotation(entryArrow);
+
+            // טקסט מעל חץ כניסה - מידע מפורט
+            String entryInfo = String.format("Entry: %.2f\nTP: %.2f\nStop: %.2f",
+                    signal.getEntryPrice(), signal.getTpPrice(), signal.getStopPrice());
+            XYTextAnnotation entryText = new XYTextAnnotation(entryInfo, x, signal.getEntryPrice() + 0.5);
+            entryText.setFont(new Font("Arial", Font.PLAIN, 10));
+            entryText.setPaint(Color.BLACK);
+            entryText.setTextAnchor(org.jfree.chart.ui.TextAnchor.BOTTOM_CENTER);
+            plot.addAnnotation(entryText);
+
+            // Stop Loss - חץ אדום למטה עם טקסט "Stop"
+            XYPointerAnnotation stopArrow = new XYPointerAnnotation(
+                    "Stop", x, signal.getStopPrice(), -Math.PI / 2);
+            stopArrow.setPaint(Color.RED.darker());
+            stopArrow.setArrowPaint(Color.RED.darker());
+            stopArrow.setFont(new Font("Arial", Font.BOLD, 12));
+            plot.addAnnotation(stopArrow);
+
+            // טקסט מתחת לחץ סטופ
+            XYTextAnnotation stopText = new XYTextAnnotation("Stop Loss", x, signal.getStopPrice() - 0.5);
+            stopText.setFont(new Font("Arial", Font.PLAIN, 10));
+            stopText.setPaint(Color.RED.darker());
+            stopText.setTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_CENTER);
+            plot.addAnnotation(stopText);
+
+            // Take Profit - חץ ירוק למעלה עם טקסט "TP"
+            XYPointerAnnotation tpArrow = new XYPointerAnnotation(
+                    "TP", x, signal.getTpPrice(), Math.PI / 2);
+            tpArrow.setPaint(Color.GREEN.darker());
+            tpArrow.setArrowPaint(Color.GREEN.darker());
+            tpArrow.setFont(new Font("Arial", Font.BOLD, 12));
+            plot.addAnnotation(tpArrow);
+
+            // אפשר להוסיף טקסט ל-TP במידת הצורך, למשל מתחת או מעל
         }
     }
 

@@ -27,7 +27,7 @@ public class TrendRSIBBBand extends TradingStrategy {
     public TrendRSIBBBand(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 2;
+        this.riskReward = 2.5;
     }
 
     @Override
@@ -93,21 +93,34 @@ public class TrendRSIBBBand extends TradingStrategy {
     }
 
     private Signal createBuySignal(int index, Candle curr) {
-        double bufferPercent = 0.01; // 1%
-        double high = curr.getHigh();
-        double low = curr.getLow();
+        // קבוע המייצג מרחק כניסה מעל השיא (מחיר במטבע)
+        double entryBuffer = 20;
 
-        double entry = high * (1 + bufferPercent);      // כניסה 1% מעל השיא
-        double sl = low * (1 - bufferPercent);          // סטופ 1% מתחת לשפל
-        double riskPerUnit = entry - sl;
+        // מחירי השיא והשפל של הנר הנוכחי
+        double highPrice = curr.getHigh();
+        double lowPrice = curr.getLow();
 
+        // מחיר כניסה - 20 יחידות מעל השיא
+        double entryPrice = highPrice + entryBuffer;
+
+        // מחיר סטופ לוס - 1% מתחת לשפל
+        double stopLossPrice = lowPrice - (lowPrice * 0.01);
+
+        // חישוב הסיכון ליחידה (מרחק בין כניסה לסטופ)
+        double riskPerUnit = entryPrice - stopLossPrice;
+
+        // אם הסיכון לא חיובי, אין טעם ליצור סיגנל
         if (riskPerUnit <= 0) {
             return null;
         }
 
+        // גודל הפוזיציה בחשבון (20 דולר סיכון מקסימלי)
         double positionSize = riskPerTradeUSD / riskPerUnit;
-        double tp = entry + (riskReward * riskPerUnit);
 
-        return new Signal(index, entry, tp, sl, positionSize);
+        // מחיר היעד (Take Profit) לפי יחס סיכון-רווח
+        double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
+
+        // מחזיר את אובייקט הסיגנל עם כל הנתונים
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize);
     }
 }
