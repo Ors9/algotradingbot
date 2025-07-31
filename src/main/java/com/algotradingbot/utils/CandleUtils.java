@@ -43,6 +43,40 @@ public class CandleUtils {
         return true;
     }
 
+    public static boolean hasMediumOrStrongBody(Candle c) {
+        double range = c.getHigh() - c.getLow();
+        if (range == 0) {
+            return false;
+        }
+        double bodyRatio = Math.abs(c.getClose() - c.getOpen()) / range;
+        return bodyRatio >= 0.4; // בין 0.4 ל־1 נחשב בינוני או חזק
+    }
+
+    public static boolean isThreeWhiteSoldiers(Candle c1, Candle c2, Candle c3) {
+        // נרות ירוקים
+        if (!CandleUtils.isGreen(c1) || !CandleUtils.isGreen(c2) || !CandleUtils.isGreen(c3)) {
+            return false;
+        }
+
+        // גוף לא חייב להיות חזק מאוד, מספיק בינוני ומעלה
+        if (!CandleUtils.hasMediumOrStrongBody(c1)
+                || !CandleUtils.hasMediumOrStrongBody(c2)
+                || !CandleUtils.hasMediumOrStrongBody(c3)) {
+            return false;
+        }
+
+        if (c2.getOpen() > c1.getClose() * 1.005 || c3.getOpen() > c2.getClose() * 1.005) {
+            return false;
+        }
+
+        // נאפשר סגירה כמעט זהה (אפילו ירידה קטנה)
+        if (c2.getClose() < c1.getClose() * 0.998 || c3.getClose() < c2.getClose() * 0.998) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static boolean isBullishHarami(Candle prev, Candle curr) {
         if (!Candle.isRed(prev) || !isGreen(curr)) {
             return false;

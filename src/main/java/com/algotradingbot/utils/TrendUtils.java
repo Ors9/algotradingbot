@@ -20,7 +20,7 @@ public class TrendUtils {
         try {
             double smaShort = calculateSMA(candles, index, smaShortPeriod); // e.g., 20
             double smaMid = calculateSMA(candles, index, smaMidPeriod);     // e.g., 50
-            double smaLarge = calculateSMA(candles, index, smaLargePeriod); // e.g., 200
+            //double smaLarge = calculateSMA(candles, index, smaLargePeriod); // e.g., 200
 
             // מגמה שורית פשוטה: SMA20 > SMA50 > SMA200
             //&& smaMid > smaLarge leave for now
@@ -37,7 +37,7 @@ public class TrendUtils {
             double sma20Val = calculateSMA(candles, index, sma20);
             double price = candles.get(index).getClose();
 
-            return sma20Val > sma50Val && sma50Val > sma200Val && price > sma20Val;
+            return sma20Val > sma50Val || (sma50Val > sma200Val && price > sma20Val);
         } catch (Exception e) {
             return false;
         }

@@ -11,13 +11,6 @@ import com.algotradingbot.utils.FilterRejectionTracker;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
-/*
- * Period: 01/01/2021 ? 01/01/2025
- * Results for Strategy:
-W:20  | L:13  | WinRate: 60.61% | Profit: $  869.25 | MaxDD: $   44.92
-last result
- * 
- */
 public class TrendRSIBBBand extends TradingStrategy {
 
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
@@ -55,8 +48,8 @@ public class TrendRSIBBBand extends TradingStrategy {
         tracker.incrementTotal(true);
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
-
-        if (!TrendUtils.isBullishEnough(candles, index)) {
+ 
+        if (!TrendUtils.isBullishEnough(candles, index) && !TrendUtils.isShortTermUptrendHolding(candles,  index, 20, 50, 200)) {
             tracker.incrementTrend(true);
             return false;
         }
@@ -142,10 +135,15 @@ public class TrendRSIBBBand extends TradingStrategy {
             tracker.incrementCandle(false);
             return false;
         }
+        if (CandleUtils.isBullishHarami(prev, curr)) {
+            System.out.println("Bullish Harami detected at index " + index + " on " + curr.getDate());
+        }
 
         if (!(CandleUtils.isBearishEngulfing(prev, curr)
                 || CandleUtils.isEveningStar(candles.get(index - 2), prev, curr)
-                || CandleUtils.isThreeBlackCrows(candles.get(index - 2), prev, curr))) {
+                || CandleUtils.isThreeBlackCrows(candles.get(index - 2), prev, curr)
+                || CandleUtils.isThreeWhiteSoldiers(candles.get(index - 2), prev, curr))) {
+
             tracker.incrementPattern(false);
             return false;
         }
