@@ -31,6 +31,7 @@ public class TrendRSIBBBand extends TradingStrategy {
             if (strategyValidLong(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createBuySignal(i, curr); // שיטה קיימת מה־TradingStrategy
+                //Signal signal = createBuySignalATR(i, curr);
                 signals.add(signal);
             }
             /*Doesnt Suit for Short!!!!!!! */
@@ -48,8 +49,8 @@ public class TrendRSIBBBand extends TradingStrategy {
         tracker.incrementTotal(true);
         Candle curr = candles.get(index);
         Candle prev = candles.get(index - 1);
- 
-        if (!TrendUtils.isBullishEnough(candles, index) && !TrendUtils.isShortTermUptrendHolding(candles,  index, 20, 50, 200)) {
+
+        if (!TrendUtils.isBullishEnough(candles, index) && !TrendUtils.isShortTermUptrendHolding(candles, index, 20, 50, 200)) {
             tracker.incrementTrend(true);
             return false;
         }
@@ -187,6 +188,25 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         double positionSize = riskPerTradeUSD / riskPerUnit;
         double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
+    }
+
+    private Signal createBuySignalATR(int index, Candle curr) {
+        double atr = TrendUtils.calculateATR(candles, index, 14); // או 21 – תבדוק מה נותן תוצאה טובה
+        double atrMultiplierSL = 1.5;
+        double atrMultiplierTP = 3.0;
+
+        double entryPrice = curr.getHigh() * 1.001; // או close אם זה עדיף
+        double stopLossPrice = entryPrice - atr * atrMultiplierSL;
+        double takeProfitPrice = entryPrice + atr * atrMultiplierTP;
+
+        double riskPerUnit = entryPrice - stopLossPrice;
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double positionSize = riskPerTradeUSD / riskPerUnit;
 
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }

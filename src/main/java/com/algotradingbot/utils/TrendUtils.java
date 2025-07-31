@@ -93,6 +93,41 @@ public class TrendUtils {
         }
     }
 
+    public static Double calculateMFI(List<Candle> candles, int index, int period) {
+        if (index < period) {
+            return null;
+        }
+
+        double positiveFlow = 0;
+        double negativeFlow = 0;
+
+        for (int i = index - period + 1; i <= index; i++) {
+            Candle curr = candles.get(i);
+            Candle prev = candles.get(i - 1);
+
+            // Typical Price = (High + Low + Close) / 3
+            double currTypical = (curr.getHigh() + curr.getLow() + curr.getClose()) / 3.0;
+            double prevTypical = (prev.getHigh() + prev.getLow() + prev.getClose()) / 3.0;
+
+            double rawMoneyFlow = currTypical * curr.getVolume();
+
+            if (currTypical > prevTypical) {
+                positiveFlow += rawMoneyFlow;
+            } else if (currTypical < prevTypical) {
+                negativeFlow += rawMoneyFlow;
+            }
+            // if they are equal, ignore this period
+        }
+
+        if (positiveFlow + negativeFlow == 0) {
+            return 50.0; // ניטרלי
+        }
+        double moneyFlowRatio = positiveFlow / negativeFlow;
+        double mfi = 100 - (100 / (1 + moneyFlowRatio));
+
+        return mfi;
+    }
+
     public static double averageVolume(ArrayList<Candle> candles, int startIndex, int period) {
         if (startIndex - period + 1 < 0) {
             throw new IllegalArgumentException("Not enough candles for volume average");
@@ -247,6 +282,105 @@ public class TrendUtils {
 
         // נחזיר פשוט את dx כמייצג ADX. אפשר לשפר בהמשך ל־EMA של DX לאורך זמן.
         return dx;
+    }
+
+    public static Double getPlusDI(List<Candle> candles, int index, int period) {
+        if (index < period + 1) {
+            return null;
+        }
+        double plusDmSum = 0;
+        double trSum = 0;
+
+        for (int i = index - period + 1; i <= index; i++) {
+            Candle curr = candles.get(i);
+            Candle prev = candles.get(i - 1);
+
+            double highDiff = curr.getHigh() - prev.getHigh();
+            double lowDiff = prev.getLow() - curr.getLow();
+
+            double plusDM = (highDiff > lowDiff && highDiff > 0) ? highDiff : 0;
+            double tr = Math.max(curr.getHigh() - curr.getLow(),
+                    Math.max(Math.abs(curr.getHigh() - prev.getClose()),
+                            Math.abs(curr.getLow() - prev.getClose())));
+            plusDmSum += plusDM;
+            trSum += tr;
+        }
+
+        double atr = trSum / period;
+        return 100 * (plusDmSum / period) / atr;
+    }
+
+    public static Double getMinusDI(List<Candle> candles, int index, int period) {
+        if (index < period + 1) {
+            return null;
+        }
+
+        double minusDmSum = 0;
+        double trSum = 0;
+
+        for (int i = index - period + 1; i <= index; i++) {
+            Candle curr = candles.get(i);
+            Candle prev = candles.get(i - 1);
+
+            double highDiff = curr.getHigh() - prev.getHigh();
+            double lowDiff = prev.getLow() - curr.getLow();
+
+            double minusDM = (lowDiff > highDiff && lowDiff > 0) ? lowDiff : 0;
+
+            double tr = Math.max(
+                    curr.getHigh() - curr.getLow(),
+                    Math.max(
+                            Math.abs(curr.getHigh() - prev.getClose()),
+                            Math.abs(curr.getLow() - prev.getClose())
+                    )
+            );
+
+            minusDmSum += minusDM;
+            trSum += tr;
+        }
+
+        double atr = trSum / period;
+        return 100 * (minusDmSum / period) / atr;
+    }
+
+    public static boolean isADXUptrend(List<Candle> candles, int index, int period) {
+        Double adx = calculateADX(candles, index, period);
+        Double plusDI = getPlusDI(candles, index, period);
+        Double minusDI = getMinusDI(candles, index, period);
+
+        if (adx == null || plusDI == null || minusDI == null) {
+
+            return false;
+        }
+
+        if (adx < 20 || plusDI <= minusDI) {
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public static double calculateATR(List<Candle> candles, int index, int period) {
+        if (index < period || candles == null || candles.size() <= index) {
+            return -1; // לא ניתן לחשב ATR
+        }
+
+        double sumTR = 0.0;
+
+        for (int i = index - period + 1; i <= index; i++) {
+            Candle curr = candles.get(i);
+            Candle prev = candles.get(i - 1);
+
+            double highLow = curr.getHigh() - curr.getLow();
+            double highClose = Math.abs(curr.getHigh() - prev.getClose());
+            double lowClose = Math.abs(curr.getLow() - prev.getClose());
+
+            double trueRange = Math.max(highLow, Math.max(highClose, lowClose));
+            sumTR += trueRange;
+        }
+
+        return sumTR / period; // ממוצע של ה־True Range
     }
 
 }
