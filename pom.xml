@@ -20,7 +20,11 @@
   
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.ib</groupId>
+            <artifactId>twsapi</artifactId>
+            <version>10.39</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jfree</groupId>

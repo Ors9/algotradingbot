@@ -9,7 +9,8 @@ public class App {
         //PeriodTester.runTestsForMultiplePeriods("BTCUSDT", "1h");
         long start = 1483228800000L; // 2017-01-01 00:00:00 UTC
         long end = System.currentTimeMillis(); // עכשיו
-        PeriodTester.runSinglePeriodTest("BTCUSDT", "1h", start, end); //almost 9 years
+        //PeriodTester.runSinglePeriodTest("BTCUSDT", "1h", start, end); //almost 9 years
+        PeriodTester.runSinglePeriodTest("BTCUSDT", "15m", start, end); //almost 9 years
         //BTCUSDT  ETHUSDT  BNBUSDT   XRPUSDT SOLUSDT
     }
 

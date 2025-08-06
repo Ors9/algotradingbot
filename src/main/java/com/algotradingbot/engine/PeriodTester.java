@@ -20,9 +20,14 @@ public class PeriodTester {
             CandlesEngine bte = new CandlesEngine();
             bte.parseCandles(json);
 
-            StrategyPerformance perf = testTrendRSIBBBand(bte);
+            /*StrategyPerformance perf = testTrendRSIBBBand(bte);
             System.out.println("Results for Strategy:");
-            perf.print();
+            perf.print();*/
+
+            StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
+            System.out.println("Results for Strategy:");
+            oldStrategy.print();
+
         } catch (Exception e) {
             System.err.println("Error during test: " + e.getMessage());
         }
@@ -135,19 +140,24 @@ public class PeriodTester {
                 CandlesEngine bte = new CandlesEngine();
                 bte.parseCandles(json);
 
-                /*Performance perf1 = testOldInsideBarStrategy(bte);
+                StrategyPerformance perf1 = testOldInsideBarStrategy(bte);
                 System.out.println("Results for OldInsideBarStrategy:");
                 perf1.print();
-                groupPerformance = groupPerformance.add(perf1);*/
-                StrategyPerformance perf2 = testTrendRSIBBBand(bte);
+                if (groupPerformance == null) {
+                    groupPerformance = perf1;
+                } else {
+                    groupPerformance = groupPerformance.add(perf1);
+                }
+
+                /*StrategyPerformance perf2 = testTrendRSIBBBand(bte);
                 System.out.println("Results for DashMarketStrategy:");
-                perf2.print();
+                perf2.print();*/
+ /* 
                 if (groupPerformance == null) {
                     groupPerformance = perf2;
                 } else {
                     groupPerformance = groupPerformance.add(perf2);
-                }
-
+                }*/
                 System.out.println("-------------------------------------------\n");
 
             } catch (Exception e) {
