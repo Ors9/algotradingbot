@@ -80,16 +80,9 @@ public class CandleChart extends JFrame {
         AnnotationUtils.addPerformanceSubtitle(chart, perf);
         stylePriceAxis(priceAxis);
 
-        int smaIndex = 1;
-        AnnotationUtils.addSMAtoCandlePlot(candlePlot, candles, 20, smaIndex++, Color.BLUE);
-        AnnotationUtils.addSMAtoCandlePlot(candlePlot, candles, 50, smaIndex++, Color.GREEN);
-        AnnotationUtils.addSMAtoCandlePlot(candlePlot, candles, 200, smaIndex++, Color.RED);
-
-        addBollingerBands(candlePlot, candles, 20, smaIndex);
-
-        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, 14);
-        combinedPlot.add(rsiPlot, 2);
-
+       
+        //StrategyChartUtils.TrendRSIBBBandUtils(candlePlot, combinedPlot, candles, 1);
+        StrategyChartUtils.BBbandWithComma(candlePlot, candles, 1);
         return chart;
     }
 
@@ -125,7 +118,7 @@ public class CandleChart extends JFrame {
         );
 
         long totalMinutes = Math.max(1, java.time.Duration.between(startLdt, endLdt).toMinutes());
-        int targetLabelCount = 10;
+        int targetLabelCount = 50;
         long minutesPerTick = Math.max(1, totalMinutes / targetLabelCount);
 
         int tickCount;
@@ -190,16 +183,6 @@ public class CandleChart extends JFrame {
             chart.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // ✅ רק סוגר את החלון הזה
             chart.setVisible(true);
         });
-    }
-
-    private void addBollingerBands(XYPlot candlePlot, ArrayList<Candle> candles, int period, int baseIndex) {
-        candlePlot.setDataset(baseIndex, DatasetFactory.createBollingerSeries(candles, period, "Upper Band"));
-        candlePlot.setDataset(baseIndex + 1, DatasetFactory.createBollingerSeries(candles, period, "Lower Band"));
-        candlePlot.setDataset(baseIndex + 2, DatasetFactory.createBollingerSeries(candles, period, "Middle Band"));
-
-        candlePlot.setRenderer(baseIndex, RendererFactory.createLineRenderer(Color.BLACK, 1f));
-        candlePlot.setRenderer(baseIndex + 1, RendererFactory.createLineRenderer(Color.BLACK, 1f));
-        candlePlot.setRenderer(baseIndex + 2, RendererFactory.createLineRenderer(Color.BLUE, 1.2f));
     }
 
 }

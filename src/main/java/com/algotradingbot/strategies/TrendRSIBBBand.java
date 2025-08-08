@@ -58,8 +58,8 @@ public class TrendRSIBBBand extends TradingStrategy {
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
         BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD + 5);
 
-        double touchThresholdSmall = bb.lower * 1.03;   // 3% מעל התחתון
-        double touchThresholdBig = bbBig.lower * 1.05; // 5% מעל התחתון הגדול
+        double touchThresholdSmall = bb.getLower() * 1.03;   // 3% מעל התחתון
+        double touchThresholdBig = bbBig.getLower() * 1.05; // 5% מעל התחתון הגדול
 
         if (curr.getLow() > touchThresholdSmall || curr.getLow() > touchThresholdBig) {
             tracker.incrementBB(true);
@@ -108,7 +108,7 @@ public class TrendRSIBBBand extends TradingStrategy {
 
         // נבדוק פריצה של רצועת עליונה ואז חזרה
         BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        double upper = bb.upper;
+        double upper = bb.getUpper();
 
         boolean fakeout = prev.getHigh() > upper && curr.getClose() < upper;
         boolean touchesUpper = curr.getHigh() >= upper * 0.97;
@@ -170,27 +170,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
     }
 
-    private Signal createBuySignal(int index, Candle curr) {
-        double entryBufferPct = 0.002; // 0.2% מעל השיא
-        double stopLossPct = 0.01;     // 1% מתחת לשפל
-
-        double highPrice = curr.getHigh();
-        double lowPrice = curr.getLow();
-
-        double entryPrice = highPrice * (1 + entryBufferPct);
-        double stopLossPrice = lowPrice * (1 - stopLossPct);
-
-        double riskPerUnit = entryPrice - stopLossPrice;
-
-        if (riskPerUnit <= 0) {
-            return null;
-        }
-
-        double positionSize = riskPerTradeUSD / riskPerUnit;
-        double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
-
-        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
-    }
+ 
 
     private Signal createBuySignalATR(int index, Candle curr) {
         double atr = TrendUtils.calculateATR(candles, index, 14); // או 21 – תבדוק מה נותן תוצאה טובה

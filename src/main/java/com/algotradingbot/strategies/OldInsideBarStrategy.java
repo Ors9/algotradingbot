@@ -58,20 +58,7 @@ public class OldInsideBarStrategy extends TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }*/
 
-    private Signal createBuySignal(int index, Candle curr) {
-        double entry = curr.getHigh() + 20;  // כניסה 20 דולר מעל ה-high
-        double sl = curr.getLow() - 20;      // SL 20 דולר מתחת ל-low
-        double riskPerUnit = entry - sl;
 
-        if (riskPerUnit <= 0) {
-            return null; // מקרה קצה – לא סביר
-        }
-
-        double positionSize = riskPerTradeUSD / riskPerUnit;
-        double tp = entry + (riskReward * riskPerUnit);
-
-        return new Signal(index, entry, tp, sl, positionSize , true);
-    }
     public boolean strategyInsideBar(Candle prev, Candle curr, int index) {
         tracker.incrementTotal(true);
         if (!TimeUtils.isTradingHour(curr.getDate()) || TimeUtils.isSaturday(curr.getDate())) {

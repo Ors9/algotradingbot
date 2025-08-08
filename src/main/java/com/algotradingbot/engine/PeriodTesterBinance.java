@@ -5,12 +5,13 @@ import java.text.SimpleDateFormat;
 
 import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.StrategyPerformance;
+import com.algotradingbot.strategies.BBbandWithComma;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
 import com.algotradingbot.strategies.TrendRSIBBBand;
 
-public class PeriodTester {
+public class PeriodTesterBinance {
 
-    public static void runSinglePeriodTest(String symbol, String interval, long start, long end) {
+    public static void runSinglePeriodTestBinance(String symbol, String interval, long start, long end) {
         System.out.println("\n============ SINGLE BIG PERIOD TEST ============\n");
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         System.out.printf("Period: %s ➝ %s\n", sdf.format(new Date(start)), sdf.format(new Date(end)));
@@ -23,10 +24,11 @@ public class PeriodTester {
             /*StrategyPerformance perf = testTrendRSIBBBand(bte);
             System.out.println("Results for Strategy:");
             perf.print();*/
-
-            StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
+ /*StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
             System.out.println("Results for Strategy:");
-            oldStrategy.print();
+            oldStrategy.print();*/
+            StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
+            bbBandWithComma.print();
 
         } catch (Exception e) {
             System.err.println("Error during test: " + e.getMessage());
@@ -140,13 +142,21 @@ public class PeriodTester {
                 CandlesEngine bte = new CandlesEngine();
                 bte.parseCandles(json);
 
-                StrategyPerformance perf1 = testOldInsideBarStrategy(bte);
+              /*   StrategyPerformance perf1 = testOldInsideBarStrategy(bte);
                 System.out.println("Results for OldInsideBarStrategy:");
                 perf1.print();
                 if (groupPerformance == null) {
                     groupPerformance = perf1;
                 } else {
                     groupPerformance = groupPerformance.add(perf1);
+                }*/
+
+                StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
+                bbBandWithComma.print();
+                if (groupPerformance == null) {
+                    groupPerformance = bbBandWithComma;
+                } else {
+                    groupPerformance = groupPerformance.add(bbBandWithComma);
                 }
 
                 /*StrategyPerformance perf2 = testTrendRSIBBBand(bte);
@@ -172,6 +182,16 @@ public class PeriodTester {
 
     private static StrategyPerformance testOldInsideBarStrategy(CandlesEngine bte) {
         OldInsideBarStrategy strategy = new OldInsideBarStrategy(bte.getCandles());
+        strategy.runBackTest();
+        strategy.evaluateSignals();
+        //strategy.printSignals();
+        StrategyPerformance perf = strategy.evaluatePerformance();
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
+        return strategy.evaluatePerformance();
+    }
+
+    private static StrategyPerformance testBBbandWithCommaStrategy(CandlesEngine bte) {
+        BBbandWithComma strategy = new BBbandWithComma(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();

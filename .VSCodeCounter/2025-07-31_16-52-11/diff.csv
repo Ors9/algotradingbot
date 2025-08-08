@@ -1,7 +1,0 @@
-"filename", "language", "Java", "comment", "blank", "total"
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\App.java", "Java", 0, 1, -2, -1
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\engine\PeriodTester.java", "Java", 22, 8, 9, 39
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\strategies\TrendRSIBBBand.java", "Java", 16, -8, 3, 11
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\CandleUtils.java", "Java", 85, 6, 24, 115
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\TrendUtils.java", "Java", 98, 3, 33, 134
-"Total", "-", 221, 10, 67, 298

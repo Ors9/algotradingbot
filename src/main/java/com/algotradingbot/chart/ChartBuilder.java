@@ -57,6 +57,7 @@ public class ChartBuilder {
 
         addPerformanceTitles(chart, perf);
         AnnotationUtils.addSignalAnnotations(candlePlot, candles, signals);
+        
 
         return chart;
     }

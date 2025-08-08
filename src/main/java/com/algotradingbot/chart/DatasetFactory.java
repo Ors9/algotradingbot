@@ -65,13 +65,13 @@ public class DatasetFactory {
                 double value;
                 switch (type) {
                     case "Upper Band":
-                        value = bb.upper;
+                        value = bb.getUpper();
                         break;
                     case "Lower Band":
-                        value = bb.lower;
+                        value = bb.getLower();
                         break;
                     case "Middle Band":
-                        value = bb.sma;
+                        value = bb.getSma();
                         break;
                     default:
                         value = 0;
@@ -117,9 +117,9 @@ public class DatasetFactory {
             if (bb != null) {
                 LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
                 Minute time = new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
-                upper.add(time, bb.upper);
-                lower.add(time, bb.lower);
-                middle.add(time, bb.sma);
+                upper.add(time, bb.getUpper());
+                lower.add(time, bb.getLower());
+                middle.add(time, bb.getSma());
             }
         }
 

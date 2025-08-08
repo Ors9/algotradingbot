@@ -77,8 +77,8 @@ public abstract class TradingStrategy {
                 longProfit += profit;
 
                 if (signal.isWinSignal()) {
-                    longWins++; 
-                }else {
+                    longWins++;
+                } else {
                     longLosses++;
                 }
             } else {
@@ -88,8 +88,8 @@ public abstract class TradingStrategy {
                 shortProfit += profit;
 
                 if (signal.isWinSignal()) {
-                    shortWins++; 
-                }else {
+                    shortWins++;
+                } else {
                     shortLosses++;
                 }
             }
@@ -105,6 +105,28 @@ public abstract class TradingStrategy {
         for (Signal signal : signals) {
             System.out.println(signal);
         }
+    }
+
+    public Signal createBuySignal(int index, Candle curr) {
+        double entryBufferPct = 0.002; // 0.2% מעל השיא
+        double stopLossPct = 0.002;     // 1% מתחת לשפל
+
+        double highPrice = curr.getHigh();
+        double lowPrice = curr.getLow();
+
+        double entryPrice = highPrice * (1 + entryBufferPct);
+        double stopLossPrice = lowPrice * (1 - stopLossPct);
+
+        double riskPerUnit = entryPrice - stopLossPrice;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+        double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 
 }

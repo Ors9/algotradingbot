@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYPointerAnnotation;
@@ -20,10 +21,13 @@ import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Performance;
 import com.algotradingbot.core.Signal;
+import com.algotradingbot.utils.TrendUtils;
 
 public class AnnotationUtils {
 
@@ -100,8 +104,6 @@ public class AnnotationUtils {
             stopArrow.setFont(new Font("Arial", Font.BOLD, 12));
             plot.addAnnotation(stopArrow);
 
-
-
             // Take Profit - חץ ירוק למעלה עם טקסט "TP"
             XYPointerAnnotation tpArrow = new XYPointerAnnotation(
                     "TP", x, signal.getTpPrice(), Math.PI / 2);
@@ -110,7 +112,13 @@ public class AnnotationUtils {
             tpArrow.setFont(new Font("Arial", Font.BOLD, 12));
             plot.addAnnotation(tpArrow);
 
-            // אפשר להוסיף טקסט ל-TP במידת הצורך
+            // טקסט נוסף: התאריך
+            String dateText = candle.getDate(); // כבר בפורמט "dd/MM/yyyy HH:mm"
+            XYTextAnnotation dateAnnotation = new XYTextAnnotation(dateText, x, signal.getEntryPrice() - 0.5);
+            dateAnnotation.setFont(new Font("Arial", Font.ITALIC, 9));
+            dateAnnotation.setPaint(Color.DARK_GRAY);
+            dateAnnotation.setTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_CENTER);
+            plot.addAnnotation(dateAnnotation);
         }
     }
 
@@ -173,4 +181,33 @@ public class AnnotationUtils {
         plot.getDomainAxis().setRange(start, end);
     }
 
+    public static void addBollingerBands(XYPlot candlePlot, ArrayList<Candle> candles, int period, int baseIndex) {
+        candlePlot.setDataset(baseIndex, DatasetFactory.createBollingerSeries(candles, period, "Upper Band"));
+        candlePlot.setDataset(baseIndex + 1, DatasetFactory.createBollingerSeries(candles, period, "Lower Band"));
+        candlePlot.setDataset(baseIndex + 2, DatasetFactory.createBollingerSeries(candles, period, "Middle Band"));
+
+        candlePlot.setRenderer(baseIndex, RendererFactory.createLineRenderer(Color.BLACK, 1f));
+        candlePlot.setRenderer(baseIndex + 1, RendererFactory.createLineRenderer(Color.BLACK, 1f));
+        candlePlot.setRenderer(baseIndex + 2, RendererFactory.createLineRenderer(Color.BLUE, 1.2f));
+    }
+
+    public static void addEMAtoCandlePlot(XYPlot plot, List<Candle> candles, int period, int datasetIndex, Color color) {
+        XYSeries emaSeries = new XYSeries("EMA " + period);
+
+        for (int i = 0; i < candles.size(); i++) {
+            Double ema = TrendUtils.calculateEMAAtIndex((ArrayList<Candle>) candles, i, period);
+            if (ema != null) {
+                long time = candles.get(i).getDateMillis();
+                emaSeries.add(time, ema);
+            }
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection(emaSeries);
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+        renderer.setSeriesPaint(0, color);
+        renderer.setSeriesStroke(0, new BasicStroke(1.2f));
+
+        plot.setDataset(datasetIndex, dataset);
+        plot.setRenderer(datasetIndex, renderer);
+    }
 }

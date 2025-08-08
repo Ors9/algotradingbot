@@ -35,61 +35,52 @@ import com.ib.client.TickAttrib;
 import com.ib.client.TickAttribBidAsk;
 import com.ib.client.TickAttribLast;
 
-
-/*שלבי המשך: 
-2. שלח בקשה למשיכת נתוני היסטוריה
-כתוב פונקציה requestHistoricalData() שקוראת ל־client.reqHistoricalData().
-
-בנה Contract מתאים למטבע/נכס שלך (למשל EURUSD).
-
-שלוט על פרמטרים כמו durationStr, barSizeSetting, whatToShow ו־useRTH.
-
-3. טפל בקבלת נתונים (Callbacks)
-מימש את historicalData(int reqId, Bar bar) — כאן אתה מקבל כל נר ומאחסן אותו ברשימה candles.
-
-מימש את historicalDataEnd(int reqId, String start, String end) — זה איתות שהנתונים היסטוריים הושלמו.
-
-במידת הצורך, עדכן UI או העבר את הנתונים הלאה במתודה זו.
- * 
- * 
- * 
- * 
- */
 public class GetDataFromInteractiveBroker implements EWrapper {
 
     private final String currency;
     private final String timeFrame;
+    private final String duration;
+    private final String endDateTime;
+    private final String whatToShow;
+    private final boolean useRTH;
     private final int port;
     private final String ip;
+
     private final ArrayList<Candle> candles;
 
     private EClientSocket client;
     private EJavaSignal signal;
     private EReader reader;
 
-    public GetDataFromInteractiveBroker(String currency, int port, String timeFrame, String ip) {
+    private int requestId = 1001;     // מזהה ייחודי לבקשת היסטוריה
+    private int nextOrderId = -1;     // מקבל ערך מ-nextValidId
+
+    public GetDataFromInteractiveBroker(String currency, String timeFrame, String duration, String endDateTime,
+            String whatToShow, boolean useRTH,
+            int port, String ip) {
         this.currency = currency;
-        this.port = port;
         this.timeFrame = timeFrame;
+        this.duration = duration;
+        this.endDateTime = endDateTime;
+        this.whatToShow = whatToShow;
+        this.useRTH = useRTH;
+        this.port = port;
         this.ip = ip;
-        candles = new ArrayList<>();
+        this.candles = new ArrayList<>();
     }
 
     public void connectToInteractiveBroker() {
-        // 1. צור את ה-signal (עוזר ל-EReader)
+        System.out.println("🚀 Attempting connection to IB on IP: " + ip + " Port: " + port);
+
         signal = new EJavaSignal();
 
-        // 2. צור את ה-client עם המחלקה שמיישמת EWrapper (this)
         client = new EClientSocket(this, signal);
 
-        // 3. חבר את ה-client לכתובת IP והפורט
-        client.eConnect(ip, port, 0);  // 0 הוא clientId
+        client.eConnect(ip, port, 0);
 
-        // 4. הפעל את ה-EReader כדי לעבד הודעות נכנסות
         reader = new EReader(client, signal);
         reader.start();
 
-        // 5. הפעל לולאה שקוראת הודעות כל זמן שהחיבור פעיל
         new Thread(() -> {
             while (client.isConnected()) {
                 signal.waitForSignal();
@@ -102,28 +93,77 @@ public class GetDataFromInteractiveBroker implements EWrapper {
         }).start();
     }
 
-    @Override
-    public void historicalData(int arg0, Bar arg1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'historicalData'");
+    public void requestHistoricalData() {
+        if (nextOrderId == -1) {
+            System.err.println("❌ Cannot request data — nextOrderId not yet received.");
+            return;
+        }
+
+        Contract contract = new Contract();
+        contract.symbol(currency);         // לדוגמה: "EUR"
+        contract.secType("CASH");
+        contract.currency("USD");
+        contract.exchange("IDEALPRO");
+
+        client.reqHistoricalData(
+                nextOrderId, // unique request id
+                contract,
+                endDateTime, // "" = now
+                duration, // e.g. "1 M"
+                timeFrame, // e.g. "1 hour"
+                whatToShow, // e.g. "MIDPOINT"
+                useRTH ? 1 : 0, // 1 = only RTH
+                1, // formatDate
+                false, // keepUpToDate
+                null // chart options
+        );
     }
 
     @Override
-    public void historicalDataEnd(int arg0, String arg1, String arg2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'historicalDataEnd'");
+    public void historicalData(int reqId, Bar bar) {
+        System.out.println("📈 " + bar.time() + " | O: " + bar.open() + " C: " + bar.close());
+        double volume = Double.parseDouble(bar.volume().toString());
+        Candle candle = new Candle(
+                bar.time(),
+                bar.open(),
+                bar.high(),
+                bar.low(),
+                bar.close(),
+                volume
+        );
+
+        candles.add(candle);
     }
 
     @Override
-    public void nextValidId(int arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'nextValidId'");
+    public void historicalDataEnd(int reqId, String startDateStr, String endDateStr) {
+        System.out.println("Historical data reception ended. From: " + startDateStr + " To: " + endDateStr);
+
     }
 
     @Override
-    public void error(Exception arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'error'");
+    public void nextValidId(int orderId) {
+        System.out.println("✅ nextValidId: " + orderId);
+        this.nextOrderId = orderId;
+
+        // ברגע שהתחברנו, נבקש נתונים היסטוריים
+        requestHistoricalData();
+    }
+
+    @Override
+    public void error(Exception e) {
+        System.err.println("Exception: " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    @Override
+    public void error(String str) {
+        System.err.println("Error: " + str);
+    }
+
+    @Override
+    public void error(int id, int errorCode, String errorMsg, String advancedInfo) {
+        System.err.println("Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg + ", AdvInfo: " + advancedInfo);
     }
 
     public String getCurrency() {
@@ -209,7 +249,7 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     @Override
     public void connectionClosed() {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'connectionClosed'");
+        System.out.println("🔌 Disconnected from Interactive Brokers.");
     }
 
     @Override
@@ -246,18 +286,6 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     public void displayGroupUpdated(int arg0, String arg1) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'displayGroupUpdated'");
-    }
-
-    @Override
-    public void error(String arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'error'");
-    }
-
-    @Override
-    public void error(int arg0, int arg1, String arg2, String arg3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'error'");
     }
 
     @Override
