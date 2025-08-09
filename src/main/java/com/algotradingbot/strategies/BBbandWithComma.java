@@ -43,6 +43,13 @@ public class BBbandWithComma extends TradingStrategy {
                 signals.add(signal);
             }
 
+            if (strategyValidShort(i)) {
+                Candle curr = candles.get(i);
+                Signal signal = createSellSignalFromClose(i, curr);
+                //Signal signal = createBuySignal(i, curr);
+                signals.add(signal);
+            }
+
         }
 
         tracker.print();
@@ -59,14 +66,14 @@ public class BBbandWithComma extends TradingStrategy {
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_22.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
-        boolean isBullishEng =  CandleUtils.isBullishEngulfing(prev,cur);
-     
+        boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur);
+
         if (!isTradingDay) {
             tracker.incrementTime(true);
             return false;
         }
-
-        if (!strongWick) {
+       
+        if (!strongWick && !isBullishEng) {
             tracker.incrementCandle(true);
             return false;
         }
@@ -78,6 +85,42 @@ public class BBbandWithComma extends TradingStrategy {
 
         if (!hasTrend && !isBullishEng) {
             tracker.incrementTrend(true);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean strategyValidShort(int index) {
+        Candle cur = candles.get(index);
+        Candle prev = candles.get(index - 1);
+        tracker.incrementTotal(false);
+        //boolean hasTrend = TrendUtils.isHighTimeFrameComma(candles, index);
+
+        boolean hasTrend = TrendUtils.isHighTimeFrameBearishComma(candles, index, COMMA_EMA_PERIOD);
+
+        boolean touchesLowerBB = TrendUtils.isTouchingUpperBB(candles, index, BBPeriod.BB_22.getPeriod());
+        boolean weakWick = CandleUtils.isRedWithStrongUpperWick(cur, STRONG_WICK_FACTOR);
+        boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
+        boolean isBearishEng = CandleUtils.isBearishEngulfing(prev, cur);
+
+        if (!isTradingDay) {
+            tracker.incrementTime(false);
+            return false;
+        }
+        // && !isBearishEng
+        if (!weakWick  && !isBearishEng) {
+            tracker.incrementCandle(false);
+            return false;
+        }
+
+        if (!touchesLowerBB) {
+            tracker.incrementBB(false);
+            return false;
+        }
+
+        if (!hasTrend && !isBearishEng) {
+            tracker.incrementTrend(false);
             return false;
         }
 

@@ -10,7 +10,6 @@ public class CandleUtils {
         return c.getClose() > c.getOpen();
     }
 
-
     public static boolean isInvertedHammer(Candle candle) {
         double body = Math.abs(candle.getClose() - candle.getOpen());
         double upperShadow = candle.getHigh() - Math.max(candle.getClose(), candle.getOpen());
@@ -46,6 +45,24 @@ public class CandleUtils {
     // גרסה נוחה עם ברירת־מחדל 1.5×
     public static boolean isGreenWithStrongLowerWick(Candle c) {
         return isGreenWithStrongLowerWick(c, 1.5);
+    }
+
+    public static boolean isRedWithStrongUpperWick(Candle c, double minRatio) {
+        double open = c.getOpen(), close = c.getClose(), high = c.getHigh(), low = c.getLow();
+        double body = Math.abs(close - open);
+        double range = high - low;
+        if (range <= 0 || body == 0) {
+            return false;
+        }
+
+        double upperWick = high - Math.max(open, close);
+        // תנאים: נר אדום + פתיל עליון >= minRatio * גוף
+        return close < open && upperWick >= minRatio * body;
+    }
+
+// גרסה נוחה עם ברירת־מחדל 1.5×
+    public static boolean isRedWithStrongUpperWick(Candle c) {
+        return isRedWithStrongUpperWick(c, 1.5);
     }
 
     public static boolean isTweezerBottom(Candle prev, Candle curr) {

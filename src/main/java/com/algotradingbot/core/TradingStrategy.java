@@ -46,7 +46,7 @@ public abstract class TradingStrategy {
             if (!signal.isEvaluated()) {
                 continue;
             }
-            
+
             double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
             if (stopSize == 0) {
                 continue;
@@ -148,6 +148,27 @@ public abstract class TradingStrategy {
         double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
 
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
+    }
+
+    public Signal createSellSignalFromClose(int index, Candle curr) {
+        double stopLossPct = 0.002; // 0.2% מעל השיא
+
+        double closePrice = curr.getClose();
+        double highPrice = curr.getHigh();
+
+        double entryPrice = closePrice;
+        double stopLossPrice = highPrice * (1 + stopLossPct);
+
+        double riskPerUnit = stopLossPrice - entryPrice;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+        double takeProfitPrice = entryPrice - (riskReward * riskPerUnit);
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
     }
 
 }

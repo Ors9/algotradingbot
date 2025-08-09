@@ -222,8 +222,6 @@ public class TrendUtils {
         return sum / period;
     }
 
-
-
     public static Double calculateEMAAtIndex(ArrayList<Candle> candles, int index, int period) {
         if (index < period) {
             return null;
@@ -245,6 +243,30 @@ public class TrendUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static boolean isHighTimeFrameBearishComma(ArrayList<Candle> candles, int index, int period) {
+        if (index < TrendUtils.EMAType.EMA_240.getPeriod() || index < period) {
+            return false;
+        }
+
+        for (int i = index - period + 1; i <= index; i++) {
+            Double ema21 = TrendUtils.calculateEMAAtIndex(candles, i, EMAType.EMA_21.getPeriod());
+            Double ema50 = TrendUtils.calculateEMAAtIndex(candles, i, EMAType.EMA_50.getPeriod());
+            Double ema100 = TrendUtils.calculateEMAAtIndex(candles, i, EMAType.EMA_100.getPeriod());
+            Double ema240 = TrendUtils.calculateEMAAtIndex(candles, i, EMAType.EMA_240.getPeriod());
+            double buffer = candles.get(i).getClose() * 0.005;
+
+            if (ema21 == null || ema50 == null || ema100 == null || ema240 == null) {
+                return false;
+            }
+            // COMMA לשורט – מגמה יורדת
+            if (!(ema21 < ema50 - buffer && ema50 < ema100 - buffer && ema100 < ema240 - buffer)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static boolean isHighTimeFrameCommaForPeriod(ArrayList<Candle> candles, int index, int period) {
@@ -326,6 +348,20 @@ public class TrendUtils {
 
         Candle candle = candles.get(index);
         return candle.getLow() <= bb.getLower(); // נוגע או מתחת
+    }
+
+    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period) {
+        if (index < period - 1) {
+            return false; // Not enough candles
+        }
+
+        BollingerBands bb = getBollingerBands(candles, index, period);
+        if (bb == null) {
+            return false;
+        }
+
+        Candle candle = candles.get(index);
+        return candle.getHigh() >= bb.getUpper(); // נוגע או מעל
     }
 
     public static BollingerBands getBollingerBands(List<Candle> candles, int index, int period) {
