@@ -28,7 +28,7 @@ public class BBbandWithComma extends TradingStrategy {
     public BBbandWithComma(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 1;
+        this.riskReward = 1.3;
         tracker = new FilterRejectionTracker();
     }
 
@@ -56,7 +56,7 @@ public class BBbandWithComma extends TradingStrategy {
 
         boolean hasTrend = TrendUtils.isHighTimeFrameCommaForPeriod(candles, index, COMMA_EMA_PERIOD);
 
-        boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_20.getPeriod());
+        boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_22.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
         boolean isBullishEng =  CandleUtils.isBullishEngulfing(prev,cur);

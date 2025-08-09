@@ -4,6 +4,7 @@ public class BollingerBands {
 
     public enum BBPeriod {
         BB_20(20),
+        BB_22(22),
         BB_30(30),
         BB_50(50),
         BB_100(100);
