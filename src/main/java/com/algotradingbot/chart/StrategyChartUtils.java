@@ -45,7 +45,7 @@ public class StrategyChartUtils {
         AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_240.getPeriod(), index++, Color.PINK);
 
         // Add Bollinger Bands
-        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_20.getPeriod(), index++);
+        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_22.getPeriod(), index++);
 
 
 

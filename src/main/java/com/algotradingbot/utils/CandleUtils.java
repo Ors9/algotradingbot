@@ -158,16 +158,15 @@ public class CandleUtils {
         double upperShadow = high - Math.max(open, close);
         double lowerShadow = Math.min(open, close) - low;
 
-        // גוף קטן יחסית
-        boolean smallBody = body <= (high - low) * 0.3;
+  
 
         // צל עליון ארוך פי 2 לפחות מהגוף
-        boolean longUpperShadow = upperShadow >= body * 2;
+        boolean longUpperShadow = upperShadow >= body * 1.5;
 
         // כמעט בלי צל תחתון
         boolean smallLowerShadow = lowerShadow <= body * 0.2;
 
-        return smallBody && longUpperShadow && smallLowerShadow;
+        return  longUpperShadow && smallLowerShadow;
     }
 
     public static boolean isBearishEngulfing(Candle prev, Candle curr) {
