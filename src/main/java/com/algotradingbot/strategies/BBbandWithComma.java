@@ -37,7 +37,7 @@ public class BBbandWithComma extends TradingStrategy {
         for (int i = MIN_CANDLES_FOR_STRATEGY; i < candles.size(); i++) {
             if (strategyValidLong(i)) {
                 Candle curr = candles.get(i);
-                Signal signal = createBuySignal(i, curr);
+                Signal signal = createBuySignalFromClose(i, curr);
 
                 signals.add(signal);
             }
@@ -56,14 +56,14 @@ public class BBbandWithComma extends TradingStrategy {
         boolean hasTrend = TrendUtils.isHighTimeFrameCommaForPeriod(candles, index, COMMA_EMA_PERIOD);
 
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_20.getPeriod());
-        boolean approvedCandle = CandleUtils.isHammer(cur)
-                || CandleUtils.isInvertedHammer(cur)
-                || CandleUtils.isBullishEngulfing(prev, cur)
-                || CandleUtils.isPiercingLine(prev, cur)
-                || CandleUtils.isTweezerBottom(prev, cur)
-                || CandleUtils.isMorningStar(candles.get(index - 2), prev, cur);
-
+        boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, 1.5);
+        boolean approvedCandles = CandleUtils.isApprovedBullishPattern(candles , index , prev , cur);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
+        boolean avoidFallingKnife
+                = Candle.isRed(prev)
+                && Candle.isRed(candles.get(index - 2))
+                && Candle.isRed(candles.get(index - 3));
+
 
         if (!isTradingDay) {
             tracker.incrementTime(true);
@@ -79,8 +79,12 @@ public class BBbandWithComma extends TradingStrategy {
             tracker.incrementBB(true);
             return false;
         }
-        //!CandleUtils.isGreen(cur)) isStrongBody לחשוב אם לשלב אותם
-        if (!approvedCandle) {
+
+
+
+        //||  !CandleUtils.isGreen(cur) ||  !CandleUtils.hasStrongBody(cur)
+        //!CandleUtils.hasStrongBody(cur) || !CandleUtils.isGreen(cur)
+        if (!strongWick ) {
             tracker.incrementCandle(true);
             return false;
         }

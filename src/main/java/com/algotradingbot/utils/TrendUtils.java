@@ -222,6 +222,8 @@ public class TrendUtils {
         return sum / period;
     }
 
+
+
     public static Double calculateEMAAtIndex(ArrayList<Candle> candles, int index, int period) {
         if (index < period) {
             return null;

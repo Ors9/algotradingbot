@@ -1,11 +1,23 @@
 package com.algotradingbot.utils;
 
+import java.util.ArrayList;
+
 import com.algotradingbot.core.Candle;
 
 public class CandleUtils {
 
     public static boolean isGreen(Candle c) {
         return c.getClose() > c.getOpen();
+    }
+
+    public static boolean isApprovedBullishPattern(
+            ArrayList<Candle> candles, int index, Candle prev, Candle cur) {
+
+        return isHammer(cur)
+                || isBullishEngulfing(prev, cur)
+                || isPiercingLine(prev, cur)
+                || isTweezerBottom(prev, cur)
+                || isMorningStar(candles.get(index - 2), prev, cur);
     }
 
     public static boolean isInvertedHammer(Candle candle) {
@@ -17,6 +29,32 @@ public class CandleUtils {
         return body > 0
                 && upperShadow >= 2 * body
                 && lowerShadow <= 0.1 * body;
+    }
+
+    // מגע נקי עם BB תחתון – סגירה מעל הקו, אבל הנמוך נוגע או חוצה אותו
+    public static boolean isCleanLowerBBTouch(Candle c, BollingerBands bb) {
+        if (bb == null) {
+            return false;
+        }
+        return c.getLow() <= bb.getLower() && c.getClose() > bb.getLower();
+    }
+
+    public static boolean isGreenWithStrongLowerWick(Candle c, double minRatio) {
+        double open = c.getOpen(), close = c.getClose(), high = c.getHigh(), low = c.getLow();
+        double body = Math.abs(close - open);
+        double range = high - low;
+        if (range <= 0 || body == 0) {
+            return false;
+        }
+
+        double lowerWick = Math.min(open, close) - low;
+        // תנאים: נר ירוק + פתיל תחתון >= minRatio * גוף
+        return close > open && lowerWick >= minRatio * body;
+    }
+
+    // גרסה נוחה עם ברירת־מחדל 1.5×
+    public static boolean isGreenWithStrongLowerWick(Candle c) {
+        return isGreenWithStrongLowerWick(c, 1.5);
     }
 
     public static boolean isTweezerBottom(Candle prev, Candle curr) {

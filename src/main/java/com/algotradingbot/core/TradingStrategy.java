@@ -129,4 +129,25 @@ public abstract class TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 
+    public Signal createBuySignalFromClose(int index, Candle curr) {
+        double stopLossPct = 0.002;     // 1% מתחת לשפל
+
+        double closePrice = curr.getClose();
+        double lowPrice = curr.getLow();
+
+        double entryPrice = closePrice;
+        double stopLossPrice = lowPrice * (1 - stopLossPct);
+
+        double riskPerUnit = entryPrice - stopLossPrice;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+        double takeProfitPrice = entryPrice + (riskReward * riskPerUnit);
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
+    }
+
 }
