@@ -57,7 +57,7 @@ public class BBbandWithComma extends TradingStrategy {
 
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_20.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, 1.5);
-        boolean approvedCandles = CandleUtils.isApprovedBullishPattern(candles , index , prev , cur);
+        boolean isInsideBar = CandleUtils.isInsideBar(prev, cur);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
         boolean avoidFallingKnife
                 = Candle.isRed(prev)
@@ -82,9 +82,8 @@ public class BBbandWithComma extends TradingStrategy {
 
 
 
-        //||  !CandleUtils.isGreen(cur) ||  !CandleUtils.hasStrongBody(cur)
-        //!CandleUtils.hasStrongBody(cur) || !CandleUtils.isGreen(cur)
-        if (!strongWick ) {
+
+        if (!strongWick && !isInsideBar) {
             tracker.incrementCandle(true);
             return false;
         }

@@ -10,15 +10,6 @@ public class CandleUtils {
         return c.getClose() > c.getOpen();
     }
 
-    public static boolean isApprovedBullishPattern(
-            ArrayList<Candle> candles, int index, Candle prev, Candle cur) {
-
-        return isHammer(cur)
-                || isBullishEngulfing(prev, cur)
-                || isPiercingLine(prev, cur)
-                || isTweezerBottom(prev, cur)
-                || isMorningStar(candles.get(index - 2), prev, cur);
-    }
 
     public static boolean isInvertedHammer(Candle candle) {
         double body = Math.abs(candle.getClose() - candle.getOpen());
