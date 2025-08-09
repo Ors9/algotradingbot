@@ -59,11 +59,6 @@ public class BBbandWithComma extends TradingStrategy {
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, 1.5);
         boolean isInsideBar = CandleUtils.isInsideBar(prev, cur);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
-        boolean avoidFallingKnife
-                = Candle.isRed(prev)
-                && Candle.isRed(candles.get(index - 2))
-                && Candle.isRed(candles.get(index - 3));
-
 
         if (!isTradingDay) {
             tracker.incrementTime(true);
