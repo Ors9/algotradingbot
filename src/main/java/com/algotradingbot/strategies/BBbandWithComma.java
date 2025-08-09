@@ -15,7 +15,7 @@ public class BBbandWithComma extends TradingStrategy {
 
     private static final double STRONG_WICK_FACTOR = 1.6;
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
-    private final int COMMA_EMA_PERIOD = 3;
+    private final int COMMA_EMA_PERIOD = 15;
 
     private FilterRejectionTracker tracker;
 
@@ -39,7 +39,7 @@ public class BBbandWithComma extends TradingStrategy {
             if (strategyValidLong(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createBuySignalFromClose(i, curr);
-
+                //Signal signal = createBuySignal(i, curr);
                 signals.add(signal);
             }
 
@@ -59,14 +59,15 @@ public class BBbandWithComma extends TradingStrategy {
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_20.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
-
+        boolean isBullishEng =  CandleUtils.isBullishEngulfing(prev,cur);
+     
         if (!isTradingDay) {
             tracker.incrementTime(true);
             return false;
         }
 
-        if (!hasTrend) {
-            tracker.incrementTrend(true);
+        if (!strongWick) {
+            tracker.incrementCandle(true);
             return false;
         }
 
@@ -75,10 +76,11 @@ public class BBbandWithComma extends TradingStrategy {
             return false;
         }
 
-        if (!strongWick ) {
-            tracker.incrementCandle(true);
+        if (!hasTrend && !isBullishEng) {
+            tracker.incrementTrend(true);
             return false;
         }
+
         return true;
     }
 

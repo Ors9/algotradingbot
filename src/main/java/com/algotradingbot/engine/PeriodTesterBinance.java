@@ -196,7 +196,7 @@ public class PeriodTesterBinance {
         strategy.evaluateSignals();
         //strategy.printSignals();
         StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
+        //CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
         return strategy.evaluatePerformance();
     }
 
