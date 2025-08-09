@@ -77,7 +77,7 @@ public class Signal {
     }
 
     public void evaluateSignal(Signal signal, ArrayList<Candle> candles) {
-        int startIndex = signal.getIndex();
+        int startIndex = signal.getIndex() + 1;
 
         for (int i = startIndex; i < candles.size(); i++) {
             Candle c = candles.get(i);

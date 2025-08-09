@@ -13,8 +13,9 @@ import com.algotradingbot.utils.TrendUtils;
 
 public class BBbandWithComma extends TradingStrategy {
 
+    private static final double STRONG_WICK_FACTOR = 1.6;
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
-    private final int COMMA_EMA_PERIOD = 10;
+    private final int COMMA_EMA_PERIOD = 3;
 
     private FilterRejectionTracker tracker;
 
@@ -56,8 +57,7 @@ public class BBbandWithComma extends TradingStrategy {
         boolean hasTrend = TrendUtils.isHighTimeFrameCommaForPeriod(candles, index, COMMA_EMA_PERIOD);
 
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_20.getPeriod());
-        boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, 1.5);
-        boolean isInsideBar = CandleUtils.isInsideBar(prev, cur);
+        boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
 
         if (!isTradingDay) {
@@ -75,10 +75,7 @@ public class BBbandWithComma extends TradingStrategy {
             return false;
         }
 
-
-
-
-        if (!strongWick && !isInsideBar) {
+        if (!strongWick ) {
             tracker.incrementCandle(true);
             return false;
         }

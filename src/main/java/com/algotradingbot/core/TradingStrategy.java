@@ -46,7 +46,7 @@ public abstract class TradingStrategy {
             if (!signal.isEvaluated()) {
                 continue;
             }
-
+            
             double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
             if (stopSize == 0) {
                 continue;
