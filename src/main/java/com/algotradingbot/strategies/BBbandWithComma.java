@@ -69,8 +69,9 @@ public class BBbandWithComma extends TradingStrategy {
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate()) && TimeUtils.isTradingHour(cur.getDate());
         boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur);
         boolean isGreenInsideBar = CandleUtils.isInsideBar(prev, cur) && CandleUtils.isGreen(cur) && CandleUtils.hasStrongBody(cur);
-        boolean rsiCloseAndRsiOS = TrendUtils.isNearLowerBB(candles, index, BBPeriod.BB_22.getPeriod(), BB_PROXIMITY_THRESHOLD)
+        boolean rsiCloseAndRsiOB = TrendUtils.isNearLowerBB(candles, index, BBPeriod.BB_22.getPeriod(), BB_PROXIMITY_THRESHOLD)
                 && TrendUtils.calculateRSI(candles, index, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue()) <= TrendUtils.RSILevel.OVERBOUGHT.getValue() && isBullishEng;
+
         if (!isTradingDay) {
             tracker.incrementTime(true);
             return false;
@@ -81,7 +82,7 @@ public class BBbandWithComma extends TradingStrategy {
             return false;
         }
 
-        if (!touchesLowerBB && !rsiCloseAndRsiOS) {
+        if (!touchesLowerBB && !rsiCloseAndRsiOB) {
             tracker.incrementBB(true);
             return false;
         }

@@ -5,16 +5,12 @@ import java.util.ArrayList;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
-import com.algotradingbot.utils.BollingerBands.BBPeriod;
-import com.algotradingbot.utils.CandleUtils;
-import com.algotradingbot.utils.TimeUtils;
-import com.algotradingbot.utils.TrendUtils;
 
 public class ExecuteDemoBBbandWithComma extends TradingStrategy {
-    private RoollingWindow roollingWindow;
+    //private RoollingWindow roollingWindow;
     public ExecuteDemoBBbandWithComma(ArrayList<Candle> candles) {
         super(null);
-        roollingWindow = new RoollingWindow();
+        //roollingWindow = new RoollingWindow();
     }
 
     // ==== Additions for live/demo execution (evaluate only the last bar) ====
