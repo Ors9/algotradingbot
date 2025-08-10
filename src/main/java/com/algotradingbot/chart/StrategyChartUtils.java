@@ -28,7 +28,7 @@ public class StrategyChartUtils {
         AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_20.getPeriod(), index++);
 
         // Add RSI
-        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD.getValue());
+        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
         combinedPlot.add(rsiPlot, 2);
     }
 

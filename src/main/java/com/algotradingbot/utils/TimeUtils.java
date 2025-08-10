@@ -9,7 +9,11 @@ public class TimeUtils {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private static final int[][] TRADING_SESSIONS = {
-        {11, 13}, {15, 20}
+        {0, 11}, // לילה עד בוקר
+        {11, 13}, // בוקר מאוחר
+        {13, 15}, // צהריים
+        //{15, 20},  // אחר צהריים עד ערב
+        {20, 24} // לילה
     };
 
     public static boolean isSaturday(String dateStr) {
@@ -33,6 +37,5 @@ public class TimeUtils {
     public static LocalDateTime parse(String dateStr) {
         return LocalDateTime.parse(dateStr, FORMATTER);
     }
-
 
 }

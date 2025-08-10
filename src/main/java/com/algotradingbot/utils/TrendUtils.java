@@ -12,7 +12,9 @@ public class TrendUtils {
     public enum RSILevel {
         OVERSOLD(30),
         OVERBOUGHT(70),
-        RSI_PERIOD(14);
+        RSI_PERIOD_14(14),
+        RSI_PERIOD_21(14);
+
         private final double value;
 
         RSILevel(double value) {

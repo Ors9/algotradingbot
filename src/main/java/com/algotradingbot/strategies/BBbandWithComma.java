@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
-import com.algotradingbot.engine.CandlesEngine;
 import com.algotradingbot.utils.BollingerBands.BBPeriod;
 import com.algotradingbot.utils.CandleUtils;
 import com.algotradingbot.utils.FilterRejectionTracker;
@@ -56,6 +55,8 @@ public class BBbandWithComma extends TradingStrategy {
         tracker.print();
     }
 
+    
+
     private boolean strategyValidLong(int index) {
         Candle cur = candles.get(index);
         Candle prev = candles.get(index - 1);
@@ -66,15 +67,17 @@ public class BBbandWithComma extends TradingStrategy {
 
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_22.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
-        boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
-        boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur);
+        boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate()) && TimeUtils.isTradingHour(cur.getDate());
+        boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur) ;
+        boolean isGreenInsideBar = CandleUtils.isInsideBar(prev, cur) && CandleUtils.isGreen(cur) && CandleUtils.hasStrongBody(cur) ;
 
+        
         if (!isTradingDay) {
             tracker.incrementTime(true);
             return false;
         }
 
-        if (!strongWick && !isBullishEng) {
+        if (!strongWick && !isBullishEng && !isGreenInsideBar ) {
             tracker.incrementCandle(true);
             return false;
         }
@@ -84,7 +87,7 @@ public class BBbandWithComma extends TradingStrategy {
             return false;
         }
 
-        if (!hasTrend && !isBullishEng) {
+        if (!hasTrend && !isBullishEng ) {
             tracker.incrementTrend(true);
             return false;
         }
