@@ -16,6 +16,7 @@ public class BBbandWithComma extends TradingStrategy {
     private static final double STRONG_WICK_FACTOR = 1.6;
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
     private final int COMMA_EMA_PERIOD = 15;
+    private static final double BB_PROXIMITY_THRESHOLD = 0.15; // 15% מהטווח לבולינגר התחתון
 
     private FilterRejectionTracker tracker;
 
@@ -28,7 +29,7 @@ public class BBbandWithComma extends TradingStrategy {
     public BBbandWithComma(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 1.3;
+        this.riskReward = 1;
         tracker = new FilterRejectionTracker();
     }
 
@@ -55,8 +56,6 @@ public class BBbandWithComma extends TradingStrategy {
         tracker.print();
     }
 
-    
-
     private boolean strategyValidLong(int index) {
         Candle cur = candles.get(index);
         Candle prev = candles.get(index - 1);
@@ -68,26 +67,26 @@ public class BBbandWithComma extends TradingStrategy {
         boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_22.getPeriod());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate()) && TimeUtils.isTradingHour(cur.getDate());
-        boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur) ;
-        boolean isGreenInsideBar = CandleUtils.isInsideBar(prev, cur) && CandleUtils.isGreen(cur) && CandleUtils.hasStrongBody(cur) ;
-
-        
+        boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur);
+        boolean isGreenInsideBar = CandleUtils.isInsideBar(prev, cur) && CandleUtils.isGreen(cur) && CandleUtils.hasStrongBody(cur);
+        boolean rsiCloseAndRsiOS = TrendUtils.isNearLowerBB(candles, index, BBPeriod.BB_22.getPeriod(), BB_PROXIMITY_THRESHOLD)
+                && TrendUtils.calculateRSI(candles, index, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue()) <= TrendUtils.RSILevel.OVERBOUGHT.getValue() && isBullishEng;
         if (!isTradingDay) {
             tracker.incrementTime(true);
             return false;
         }
 
-        if (!strongWick && !isBullishEng && !isGreenInsideBar ) {
+        if (!strongWick && !isBullishEng && !isGreenInsideBar) {
             tracker.incrementCandle(true);
             return false;
         }
 
-        if (!touchesLowerBB) {
+        if (!touchesLowerBB && !rsiCloseAndRsiOS) {
             tracker.incrementBB(true);
             return false;
         }
 
-        if (!hasTrend && !isBullishEng ) {
+        if (!hasTrend && !isBullishEng) {
             tracker.incrementTrend(true);
             return false;
         }

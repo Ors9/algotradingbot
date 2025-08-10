@@ -338,6 +338,20 @@ public class TrendUtils {
 
     }
 
+    public static boolean isNearLowerBB(List<Candle> candles, int index, int period, double maxFracOfBand) {
+        BollingerBands bb = getBollingerBands(candles, index, period);
+        if (bb == null) {
+            return false;
+        }
+        Candle c = candles.get(index);
+        double bandWidth = bb.getUpper() - bb.getLower();
+        if (bandWidth <= 0) {
+            return false;
+        }
+        double distFromLower = c.getLow() - bb.getLower(); // כמה רחוק מהתחתון
+        return distFromLower >= 0 && (distFromLower / bandWidth) <= maxFracOfBand; // “כמעט־נגיעה”
+    }
+
     public static boolean isTouchingLowerBB(List<Candle> candles, int index, int period) {
         if (index < period - 1) {
             return false; // Not enough candles
