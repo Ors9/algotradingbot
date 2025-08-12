@@ -1,6 +1,7 @@
 package com.algotradingbot.utils;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import com.algotradingbot.core.Candle;
 
@@ -158,15 +159,13 @@ public class CandleUtils {
         double upperShadow = high - Math.max(open, close);
         double lowerShadow = Math.min(open, close) - low;
 
-  
-
         // צל עליון ארוך פי 2 לפחות מהגוף
         boolean longUpperShadow = upperShadow >= body * 1.5;
 
         // כמעט בלי צל תחתון
         boolean smallLowerShadow = lowerShadow <= body * 0.2;
 
-        return  longUpperShadow && smallLowerShadow;
+        return longUpperShadow && smallLowerShadow;
     }
 
     public static boolean isBearishEngulfing(Candle prev, Candle curr) {
@@ -254,6 +253,13 @@ public class CandleUtils {
         boolean closesLower = c2.getClose() < c1.getClose() && c3.getClose() < c2.getClose();
 
         return opensWithinPrev && closesLower;
+    }
+
+    public static ArrayList<Candle> normalizeFxCandles(ArrayList<Candle> candles) {
+        return candles.stream()
+                .filter(c -> TimeUtils.isFxTradableInstant(c.getDateMillis()))
+                // .filter(c -> TimeUtils.isFxTradableInstant(c.getDateMillisFromIbFormat())) // אם date בפורמט IB
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

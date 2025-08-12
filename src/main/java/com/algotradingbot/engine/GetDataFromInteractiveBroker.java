@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.algotradingbot.core.Candle;
+import com.algotradingbot.utils.TimeUtils;
 import com.ib.client.Bar;
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
@@ -36,6 +37,8 @@ import com.ib.client.TickAttribBidAsk;
 import com.ib.client.TickAttribLast;
 
 public class GetDataFromInteractiveBroker implements EWrapper {
+
+    private final java.util.concurrent.CountDownLatch histDone = new java.util.concurrent.CountDownLatch(1);
 
     private final String currency;
     private final String timeFrame;
@@ -76,7 +79,16 @@ public class GetDataFromInteractiveBroker implements EWrapper {
 
         client = new EClientSocket(this, signal);
 
-        client.eConnect(ip, port, 0);
+        client.eConnect(ip, port, 1);
+        System.out.printf("Attempted connect to %s:%d%n", ip, port);
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ignored) {
+        }
+        if (!client.isConnected()) {
+            System.err.println("Still not connected after eConnect (TCP refused/blocked or wrong IP/port/API settings).");
+            return;
+        }
 
         reader = new EReader(client, signal);
         reader.start();
@@ -121,10 +133,9 @@ public class GetDataFromInteractiveBroker implements EWrapper {
 
     @Override
     public void historicalData(int reqId, Bar bar) {
-        System.out.println("📈 " + bar.time() + " | O: " + bar.open() + " C: " + bar.close());
         double volume = Double.parseDouble(bar.volume().toString());
         Candle candle = new Candle(
-                bar.time(),
+                TimeUtils.ibToLegacyString(bar.time()),
                 bar.open(),
                 bar.high(),
                 bar.low(),
@@ -138,7 +149,14 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     @Override
     public void historicalDataEnd(int reqId, String startDateStr, String endDateStr) {
         System.out.println("Historical data reception ended. From: " + startDateStr + " To: " + endDateStr);
+        histDone.countDown();
+    }
 
+    public void awaitHistoricalData() {
+        try {
+            histDone.await();
+        } catch (InterruptedException ignored) {
+        }
     }
 
     @Override
@@ -242,14 +260,12 @@ public class GetDataFromInteractiveBroker implements EWrapper {
 
     @Override
     public void connectAck() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'connectAck'");
+        System.out.println("Connected (ACK).");
     }
 
     @Override
     public void connectionClosed() {
-        // TODO Auto-generated method stub
-        System.out.println("🔌 Disconnected from Interactive Brokers.");
+        System.out.println("Disconnected from Interactive Brokers.");
     }
 
     @Override
@@ -367,9 +383,8 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     }
 
     @Override
-    public void managedAccounts(String arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'managedAccounts'");
+    public void managedAccounts(String accountsList) {
+        System.out.println("Accounts: " + accountsList);
     }
 
     @Override

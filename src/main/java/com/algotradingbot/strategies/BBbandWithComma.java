@@ -44,13 +44,6 @@ public class BBbandWithComma extends TradingStrategy {
                 signals.add(signal);
             }
 
-            if (strategyValidShort(i)) {
-                Candle curr = candles.get(i);
-                Signal signal = createSellSignalFromClose(i, curr);
-                //Signal signal = createBuySignal(i, curr);
-                signals.add(signal);
-            }
-
         }
 
         tracker.print();
@@ -95,44 +88,6 @@ public class BBbandWithComma extends TradingStrategy {
         return true;
     }
 
-    private boolean strategyValidShort(int index) {
-        Candle cur = candles.get(index);
-        Candle prev = candles.get(index - 1);
-        tracker.incrementTotal(false);
-        //boolean hasTrend = TrendUtils.isHighTimeFrameComma(candles, index);
-
-        boolean hasTrend = TrendUtils.isHighTimeFrameBearishComma(candles, index, COMMA_EMA_PERIOD);
-
-        boolean touchesLowerBB = TrendUtils.isTouchingUpperBB(candles, index, BBPeriod.BB_20.getPeriod());
-        boolean weakWick = CandleUtils.isRedWithStrongUpperWick(cur, STRONG_WICK_FACTOR);
-        boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate());
-        boolean isBearishEng = CandleUtils.isBearishEngulfing(prev, cur);
-        boolean isBigRedInsideBar
-                = CandleUtils.isInsideBar(prev, cur)
-                && Candle.isRed(cur)
-                && CandleUtils.hasStrongBody(cur);
-
-        if (!isTradingDay) {
-            tracker.incrementTime(false);
-            return false;
-        }
-        // && !weakWick  
-        if (!isBearishEng && !isBigRedInsideBar) {
-            tracker.incrementCandle(false);
-            return false;
-        }
-
-        if (!touchesLowerBB) {
-            tracker.incrementBB(false);
-            return false;
-        }
-
-        if (!hasTrend) {
-            tracker.incrementTrend(false);
-            return false;
-        }
-
-        return true;
-    }
+ 
 
 }

@@ -30,15 +30,25 @@ import org.jfree.data.xy.DefaultHighLowDataset;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Performance;
 import com.algotradingbot.core.Signal;
+import com.algotradingbot.utils.CandleUtils;
+import com.algotradingbot.utils.TimeUtils;
 
 public class CandleChart extends JFrame {
 
+    public static enum ChartOverlayMode {
+        TREND_RSI_BB, // TrendRSIBBBandUtils
+        BB_COMMA_ONLY, // BBbandWithComma
+        DIVERGENCE        // DivergenceStrategyUtils
+    }
+
     private static final Dimension DEFAULT_PANEL_SIZE = new Dimension(1600, 800);
 
-    public CandleChart(String title, ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf) {
+    private final ChartOverlayMode overlayMode;
+
+    public CandleChart(String title, ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf, ChartOverlayMode overlayMode) {
         super(title);
         setLayout(new BorderLayout());
-
+        this.overlayMode = overlayMode;
         DefaultHighLowDataset dataset = DatasetFactory.createDataset(candles);
         JFreeChart chart = createCombinedChart(dataset, candles, perf); // <- שינוי כאן
         CombinedDomainXYPlot combinedPlot = (CombinedDomainXYPlot) chart.getPlot();
@@ -65,12 +75,10 @@ public class CandleChart extends JFrame {
         NumberAxis priceAxis = createPriceAxis(candles, startIndex, endIndex);
         XYPlot candlePlot = PlotFactory.createCandlePlot(candleDataset, priceAxis);
 
-        XYPlot volumePlot = PlotFactory.createVolumePlot(candles);
-
         DateAxis timeAxis = createTimeAxis(candles, startIndex, endIndex);
         CombinedDomainXYPlot combinedPlot = new CombinedDomainXYPlot(timeAxis);
         combinedPlot.add(candlePlot, 5);
-        combinedPlot.add(volumePlot, 1);
+
         combinedPlot.setDomainPannable(true);
         combinedPlot.setBackgroundPaint(Color.WHITE);
         combinedPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
@@ -79,10 +87,23 @@ public class CandleChart extends JFrame {
         JFreeChart chart = new JFreeChart("", JFreeChart.DEFAULT_TITLE_FONT, combinedPlot, false);
         AnnotationUtils.addPerformanceSubtitle(chart, perf);
         stylePriceAxis(priceAxis);
-
-       
-        //StrategyChartUtils.TrendRSIBBBandUtils(candlePlot, combinedPlot, candles, 1);
-        StrategyChartUtils.BBbandWithComma(candlePlot, candles, 1);
+        XYPlot volumePlot;
+        // ✅ Choose overlay mode
+        switch (overlayMode) {
+            case TREND_RSI_BB:
+                 volumePlot = PlotFactory.createVolumePlot(candles);
+                combinedPlot.add(volumePlot, 1);
+                StrategyChartUtils.TrendRSIBBBandUtils(candlePlot, combinedPlot, candles, 1);
+                break;
+            case BB_COMMA_ONLY:
+                 volumePlot = PlotFactory.createVolumePlot(candles);
+                combinedPlot.add(volumePlot, 1);
+                StrategyChartUtils.BBbandWithComma(candlePlot, candles, 1);
+                break;
+            case DIVERGENCE:
+                StrategyChartUtils.DivergenceStrategyUtils(candlePlot, combinedPlot, candles, 1);
+                break;
+        }
         return chart;
     }
 
@@ -176,11 +197,26 @@ public class CandleChart extends JFrame {
         return panel;
     }
 
-    public static void showChart(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf) {
+    public static void showChart(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf, ChartOverlayMode overlayMode) {
         SwingUtilities.invokeLater(() -> {
-            CandleChart chart = new CandleChart("Candlestick Chart", candles, signals, perf);
+            CandleChart chart = new CandleChart("Candlestick Chart", candles, signals, perf, overlayMode);
             chart.setSize(1000, 700);
             chart.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // ✅ רק סוגר את החלון הזה
+            chart.setVisible(true);
+        });
+    }
+
+    // מתודה חדשה להצגת גרף FX (השארת הישנה ל-BTC)
+    public static void showChartFx(ArrayList<Candle> candles, ArrayList<Signal> signals, Performance perf, ChartOverlayMode overlayMode) {
+        SwingUtilities.invokeLater(() -> {
+            // 1) remove closed FX hours (Fri eve → Sun eve ET)
+            ArrayList<Candle> fxOpen = CandleUtils.normalizeFxCandles(candles);
+            // 2) compress axis time to continuous hourly sequence
+            ArrayList<Candle> display = TimeUtils.compressToSequentialHours(fxOpen);
+
+            CandleChart chart = new CandleChart("Candlestick Chart (FX compressed)", display, signals, perf, overlayMode);
+            chart.setSize(1000, 700);
+            chart.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             chart.setVisible(true);
         });
     }

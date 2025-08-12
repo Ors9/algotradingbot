@@ -32,6 +32,19 @@ public class StrategyChartUtils {
         combinedPlot.add(rsiPlot, 2);
     }
 
+    public static void DivergenceStrategyUtils(XYPlot candlePlot, CombinedDomainXYPlot combinedPlot,
+            ArrayList<Candle> candles, int smaStartIndex) {
+        int index = smaStartIndex;
+        // Add SMA
+
+        // Add Bollinger Bands
+        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_20.getPeriod(), index++);
+
+        // Add RSI
+        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
+        combinedPlot.add(rsiPlot, 2);
+    }
+
     /**
      * אסטרטגיה: BB + 4 EMA ("Comma")
      */
@@ -47,10 +60,6 @@ public class StrategyChartUtils {
         // Add Bollinger Bands
         AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_22.getPeriod(), index++);
 
-
-
     }
-
-
 
 }

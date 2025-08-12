@@ -1,7 +1,9 @@
 package com.algotradingbot.core;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Candle {
@@ -48,6 +50,40 @@ public class Candle {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         LocalDateTime ldt = LocalDateTime.parse(this.date, formatter);
         return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Parses IB date format like "20240814 20:00:00 US/Eastern" into epoch
+     * millis.
+     */
+    public long getDateMillisFromIbFormat() {
+        String s = date.trim();
+        ZoneId ibZone = ZoneId.of("US/Eastern");
+        DateTimeFormatter withZone = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss VV");
+        DateTimeFormatter noZone = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
+
+        try {
+            // עם אזור זמן (הפורמט הרגיל של IB)
+            ZonedDateTime zdt = ZonedDateTime.parse(s, withZone);
+            return zdt.toInstant().toEpochMilli();
+        } catch (Exception ignore) {
+        }
+
+        try {
+            // בלי אזור זמן
+            LocalDateTime ldt = LocalDateTime.parse(s, noZone);
+            return ldt.atZone(ibZone).toInstant().toEpochMilli();
+        } catch (Exception ignore) {
+        }
+
+        try {
+            // תאריך בלבד
+            LocalDate ld = LocalDate.parse(s, DateTimeFormatter.BASIC_ISO_DATE);
+            return ld.atStartOfDay(ibZone).toInstant().toEpochMilli();
+        } catch (Exception ignore) {
+        }
+
+        throw new IllegalArgumentException("Unrecognized IB date format: " + date);
     }
 
     public double getBodyHeight() {

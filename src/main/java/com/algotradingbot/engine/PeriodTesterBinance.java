@@ -186,7 +186,7 @@ public class PeriodTesterBinance {
         strategy.evaluateSignals();
         //strategy.printSignals();
         StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance() , CandleChart.ChartOverlayMode.TREND_RSI_BB);
         return strategy.evaluatePerformance();
     }
 
@@ -196,7 +196,7 @@ public class PeriodTesterBinance {
         strategy.evaluateSignals();
         //strategy.printSignals();
         StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance() , CandleChart.ChartOverlayMode.BB_COMMA_ONLY);
         return strategy.evaluatePerformance();
     }
 
@@ -206,7 +206,7 @@ public class PeriodTesterBinance {
         strategy.evaluateSignals();
         strategy.printSignals();
         StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance());
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance() , CandleChart.ChartOverlayMode.TREND_RSI_BB);
         return strategy.evaluatePerformance();
     }
 }
