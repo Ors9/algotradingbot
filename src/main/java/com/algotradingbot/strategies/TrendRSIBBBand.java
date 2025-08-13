@@ -170,8 +170,6 @@ public class TrendRSIBBBand extends TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
     }
 
- 
-
     private Signal createBuySignalATR(int index, Candle curr) {
         double atr = TrendUtils.calculateATR(candles, index, 14); // או 21 – תבדוק מה נותן תוצאה טובה
         double atrMultiplierSL = 1.5;
@@ -189,5 +187,27 @@ public class TrendRSIBBBand extends TradingStrategy {
         double positionSize = riskPerTradeUSD / riskPerUnit;
 
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
+    }
+
+    // --- ATR-based SHORT (entry at close) ---
+    public Signal createSellSignalATR(
+            int index, Candle curr,
+            double atr, double atrMult,
+            double riskReward) {
+
+        if (curr == null || atr <= 0 || Double.isNaN(atr) || atrMult <= 0) {
+            return null;
+        }
+
+        double entry = curr.getClose();                 // ✅ enter at close
+        double stop = entry + (atrMult * atr);         // SL above entry by ATR
+        double riskPerUnit = stop - entry;              // must be > 0
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double tp = entry - (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
+
+        return new Signal(index, entry, tp, stop, riskPerTradeUSD, false);
     }
 }

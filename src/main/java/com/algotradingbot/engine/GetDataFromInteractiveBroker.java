@@ -1,5 +1,6 @@
 package com.algotradingbot.engine;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.algotradingbot.core.Candle;
-import com.algotradingbot.utils.TimeUtils;
 import com.ib.client.Bar;
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
@@ -38,7 +38,30 @@ import com.ib.client.TickAttribLast;
 
 public class GetDataFromInteractiveBroker implements EWrapper {
 
-    private final java.util.concurrent.CountDownLatch histDone = new java.util.concurrent.CountDownLatch(1);
+    // פורמט תאריך IB ידני (כשמעבירים endDateTime כמחרוזת)
+    private static final java.time.format.DateTimeFormatter IB_FMT
+            = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss").withZone(java.time.ZoneOffset.UTC);
+
+    // מטרה: מתי לעצור (epoch seconds) לפי "5 Y"
+    private long targetStartEpoch = Long.MAX_VALUE;
+
+    // לולאת איסוף: end דינמי שיתקדם לאחור
+    private volatile String pagingEndDateTime = "";
+
+    // מעקב אחרי הנר הכי מוקדם בכל מנה
+    private volatile long earliestEpochInBatch = Long.MAX_VALUE;
+
+    // מזהה בקשה פנימי (לא להשתמש ב-nextOrderId)
+    private int histReqId = 5000;
+
+    // לניהול המתנה לכל מנה
+    private java.util.concurrent.CountDownLatch batchDone;
+
+    // דגל ריצה + לאצ' סופי שמסמן ש"הורדתי הכל"
+    private volatile boolean rangeRunnerStarted = false;
+    private final java.util.concurrent.CountDownLatch allDone = new java.util.concurrent.CountDownLatch(1);
+    // AFTER:
+    private static final String BATCH_DURATION = "10 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
 
     private final String currency;
     private final String timeFrame;
@@ -55,7 +78,6 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     private EJavaSignal signal;
     private EReader reader;
 
-    private int requestId = 1001;     // מזהה ייחודי לבקשת היסטוריה
     private int nextOrderId = -1;     // מקבל ערך מ-nextValidId
 
     public GetDataFromInteractiveBroker(String currency, String timeFrame, String duration, String endDateTime,
@@ -105,67 +127,190 @@ public class GetDataFromInteractiveBroker implements EWrapper {
         }).start();
     }
 
-    public void requestHistoricalData() {
-        if (nextOrderId == -1) {
-            System.err.println("❌ Cannot request data — nextOrderId not yet received.");
-            return;
-        }
-
-        Contract contract = new Contract();
-        contract.symbol(currency);         // לדוגמה: "EUR"
-        contract.secType("CASH");
-        contract.currency("USD");
-        contract.exchange("IDEALPRO");
-
-        client.reqHistoricalData(
-                nextOrderId, // unique request id
-                contract,
-                endDateTime, // "" = now
-                duration, // e.g. "1 M"
-                timeFrame, // e.g. "1 hour"
-                whatToShow, // e.g. "MIDPOINT"
-                useRTH ? 1 : 0, // 1 = only RTH
-                1, // formatDate
-                false, // keepUpToDate
-                null // chart options
-        );
-    }
-
     @Override
     public void historicalData(int reqId, Bar bar) {
-        double volume = Double.parseDouble(bar.volume().toString());
-        Candle candle = new Candle(
-                TimeUtils.ibToLegacyString(bar.time()),
-                bar.open(),
-                bar.high(),
-                bar.low(),
-                bar.close(),
-                volume
-        );
+        // With formatDate=2, bar.time() is epoch seconds (often as a String)
+        long epochSec;
+        try {
+            epochSec = Long.parseLong(bar.time());
+        } catch (NumberFormatException e) {
+            // rare fallback if IB returns a date string here
+            epochSec = com.algotradingbot.utils.TimeUtils.parseIb(bar.time())
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toEpochSecond();
+        }
 
-        candles.add(candle);
+        if (epochSec < earliestEpochInBatch) {
+            earliestEpochInBatch = epochSec;
+        }
+
+        double volume = Double.parseDouble(bar.volume().toString());
+
+        // Use the “any” helper to get your legacy string
+        String dateStr = com.algotradingbot.utils.TimeUtils.epochToLegacyString(epochSec);
+        candles.add(new Candle(
+                dateStr,
+                bar.open(), bar.high(), bar.low(), bar.close(), volume
+        ));
     }
 
     @Override
     public void historicalDataEnd(int reqId, String startDateStr, String endDateStr) {
-        System.out.println("Historical data reception ended. From: " + startDateStr + " To: " + endDateStr);
-        histDone.countDown();
+        System.out.println("Historical data batch end. From: " + startDateStr + " To: " + endDateStr);
+        if (batchDone != null) {
+            batchDone.countDown();
+        }
     }
 
     public void awaitHistoricalData() {
         try {
-            histDone.await();
+            allDone.await();
         } catch (InterruptedException ignored) {
         }
     }
 
     @Override
     public void nextValidId(int orderId) {
-        System.out.println("✅ nextValidId: " + orderId);
-        this.nextOrderId = orderId;
+        this.nextOrderId = orderId; // רק סימון זמינות
+        maybeStartRangeRunner();
+    }
 
-        // ברגע שהתחברנו, נבקש נתונים היסטוריים
-        requestHistoricalData();
+    private void maybeStartRangeRunner() {
+        if (!client.isConnected() || nextOrderId == -1 || rangeRunnerStarted) {
+            return;
+        }
+        rangeRunnerStarted = true;
+
+        // גוזרים יעד התחלה מתוך duration ("5 Y") יחסית ל-endDateTime (ריק=עכשיו)
+        long endEpoch = endDateTime == null || endDateTime.isEmpty()
+                ? java.time.Instant.now().getEpochSecond()
+                : parseIbDateToEpoch(endDateTime);
+        long spanSec = parseDurationToSeconds(duration); // "5 Y" -> שניות
+        targetStartEpoch = endEpoch - spanSec;
+
+        // נקודת ה-end הראשונה: או "" (=עכשיו) או מה שנתת
+        pagingEndDateTime = (endDateTime == null) ? "" : endDateTime;
+
+        // מריצים לולאת פריסה במיתר נפרד
+        new Thread(this::runPagedHistoryLoop, "IB-History-RangeRunner").start();
+    }
+
+    private void runPagedHistoryLoop() {
+        try {
+            while (true) {
+                // נכין לאצ' למנה הנוכחית
+                batchDone = new java.util.concurrent.CountDownLatch(1);
+                earliestEpochInBatch = Long.MAX_VALUE;
+
+                // שולחים בקשה: 1 חודש אחורה מה-end הנוכחי, ב-barSize שקיבלת מבחוץ ("1 hour")
+                int reqId = histReqId++;
+                Contract contract = buildFxContract(currency);
+
+                client.reqHistoricalData(
+                        reqId, contract, pagingEndDateTime,
+                        BATCH_DURATION, timeFrame, whatToShow,
+                        useRTH ? 1 : 0,
+                        2, // epoch seconds
+                        false, null
+                );
+
+                // המתנה לסיום המנה (historicalDataEnd)
+                batchDone.await();
+
+                // אם לא קיבלנו כלום – אין כבר נתונים
+                if (earliestEpochInBatch == Long.MAX_VALUE) {
+                    break;
+                }
+
+                // עצירת תנאי: הגענו/עברנו את יעד ההתחלה (לפני 5 שנים)
+                if (earliestEpochInBatch <= targetStartEpoch) {
+                    break;
+                }
+
+                // end הבא = שנייה לפני הנר הכי מוקדם במנה הזו
+                long nextEndEpoch = earliestEpochInBatch - 1;
+                pagingEndDateTime = fmtEndUtc(nextEndEpoch);
+
+                // מנוחה קטנה נגד pacing
+                try {
+                    Thread.sleep(1100);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        } catch (InterruptedException ignored) {
+            // אפשר לוג
+        } finally {
+            allDone.countDown(); // מסמן ל-runSinglePeriodTest שאפשר להמשיך
+        }
+    }
+
+    private Contract buildFxContract(String base) {
+        Contract c = new Contract();
+        c.symbol(base);         // e.g., "EUR"
+        c.secType("CASH");
+        c.currency("USD");
+        c.exchange("IDEALPRO");
+        return c;
+    }
+
+    private long parseIbDateToEpoch(String s) {
+        s = s.trim().replace('-', ' ');
+
+        // Case: "yyyyMMdd" only
+        if (s.length() == 8) {
+            s += " 00:00:00";
+        }
+
+        // With zone: "yyyyMMdd HH:mm:ss ZZZ"
+        String[] parts = s.split("\\s+");
+        if (parts.length >= 3) {
+            String ymdHms = parts[0] + " " + parts[1];
+            java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(
+                    ymdHms,
+                    java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+            );
+            java.time.ZoneId zone = java.time.ZoneId.of(parts[2]);
+            return ldt.atZone(zone).toEpochSecond();
+        }
+
+        // Without zone: assume UTC
+        java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(
+                s,
+                java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")
+        );
+        return ldt.toEpochSecond(java.time.ZoneOffset.UTC);
+    }
+
+    // אופציה A: UTC (מומלץ)
+    private static String fmtEndUtc(long epochSec) {
+        return IB_FMT.format(Instant.ofEpochSecond(epochSec)) + " UTC";
+    }
+
+// עוזר: "5 Y" / "12 M" / "30 D" → שניות (ראף, מספיק לצורך עצירה)
+    private long parseDurationToSeconds(String dur) {
+        if (dur == null || dur.isEmpty()) {
+            return 0;
+        }
+        String[] parts = dur.trim().split("\\s+");
+        if (parts.length != 2) {
+            return 0;
+        }
+        long n = Long.parseLong(parts[0]);
+        String unit = parts[1].toUpperCase();
+        switch (unit) {
+            case "Y":
+                return n * 365L * 24 * 3600;
+            case "M":
+                return n * 30L * 24 * 3600;
+            case "W":
+                return n * 7L * 24 * 3600;
+            case "D":
+                return n * 24L * 3600;
+            case "H":
+                return n * 3600L;
+            default:
+                return 0;
+        }
     }
 
     @Override
@@ -201,7 +346,7 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     }
 
     public ArrayList<Candle> getCandles() {
-        return candles;
+        return new ArrayList(candles);
     }
 
     @Override

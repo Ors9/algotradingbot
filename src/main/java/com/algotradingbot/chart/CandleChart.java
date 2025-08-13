@@ -38,7 +38,8 @@ public class CandleChart extends JFrame {
     public static enum ChartOverlayMode {
         TREND_RSI_BB, // TrendRSIBBBandUtils
         BB_COMMA_ONLY, // BBbandWithComma
-        DIVERGENCE        // DivergenceStrategyUtils
+        DIVERGENCE, // DivergenceStrategyUtils
+        TREND_ONLY
     }
 
     private static final Dimension DEFAULT_PANEL_SIZE = new Dimension(1600, 800);
@@ -91,18 +92,22 @@ public class CandleChart extends JFrame {
         // ✅ Choose overlay mode
         switch (overlayMode) {
             case TREND_RSI_BB:
-                 volumePlot = PlotFactory.createVolumePlot(candles);
+                volumePlot = PlotFactory.createVolumePlot(candles);
                 combinedPlot.add(volumePlot, 1);
                 StrategyChartUtils.TrendRSIBBBandUtils(candlePlot, combinedPlot, candles, 1);
                 break;
             case BB_COMMA_ONLY:
-                 volumePlot = PlotFactory.createVolumePlot(candles);
+                volumePlot = PlotFactory.createVolumePlot(candles);
                 combinedPlot.add(volumePlot, 1);
                 StrategyChartUtils.BBbandWithComma(candlePlot, candles, 1);
                 break;
             case DIVERGENCE:
                 StrategyChartUtils.DivergenceStrategyUtils(candlePlot, combinedPlot, candles, 1);
                 break;
+            case TREND_ONLY:
+                StrategyChartUtils.TrendFollowStrategyUtils(candlePlot, candles, 1);
+                break;
+
         }
         return chart;
     }

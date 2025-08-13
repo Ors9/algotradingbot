@@ -55,14 +55,14 @@ public class TimeUtils {
         return ld.atStartOfDay(IB_ZONE).withZoneSameInstant(LOCAL_ZONE).toLocalDateTime();
     }
 
-    /**
-     * ממיר פורמט IB למחרוזת בפורמט הישן "dd/MM/yyyy HH:mm" (נוח לשמירה/תצוגה).
-     */
     public static String ibToLegacyString(String ibStr) {
-        LocalDateTime ldtLocal = parseIb(ibStr);
-        return ldtLocal.format(FORMATTER);
+    String s = ibStr.trim();
+    if (isEpochSecondsString(s)) {
+        return epochToLegacyString(Long.parseLong(s));
     }
-
+    LocalDateTime ldtLocal = parseIb(s);
+    return ldtLocal.format(FORMATTER);
+    }
     /**
      * parse "חכם": מנסה קודם פורמט ישן, ואם נכשל — פורמט IB.
      */
@@ -164,5 +164,28 @@ public class TimeUtils {
             t = t.plusHours(1); // continuous hourly steps (no weekend hole)
         }
         return out;
+    }
+
+    // 1) quick check
+    private static boolean isEpochSecondsString(String s) {
+        // IB epoch is 10-digit seconds (until year ~2286)
+        return s != null && s.matches("\\d{10}");
+    }
+
+// 2) epoch -> legacy "dd/MM/yyyy HH:mm"
+    public static String epochToLegacyString(long epochSeconds) {
+        return FORMATTER.format(Instant.ofEpochSecond(epochSeconds)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime());
+    }
+
+// 3) accept either epoch seconds or IB strings
+    public static String ibAnyToLegacyString(Object timeObj) {
+        String s = String.valueOf(timeObj).trim();
+        if (isEpochSecondsString(s)) {
+            return epochToLegacyString(Long.parseLong(s));
+        }
+        // fallback: your existing IB parsing
+        return ibToLegacyString(s);
     }
 }

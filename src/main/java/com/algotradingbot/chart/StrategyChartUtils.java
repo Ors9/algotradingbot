@@ -62,4 +62,19 @@ public class StrategyChartUtils {
 
     }
 
+
+        /**
+     * אסטרטגיה: BB + 4 EMA ("Comma")
+     */
+    public static void TrendFollowStrategyUtils(XYPlot candlePlot, ArrayList<Candle> candles, int startIndex) {
+        int index = startIndex;
+
+        // Add 4 EMAs
+        AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_21.getPeriod(), index++, Color.MAGENTA);
+        AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_50.getPeriod(), index++, Color.ORANGE);
+        AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_100.getPeriod(), index++, Color.CYAN);
+        AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_240.getPeriod(), index++, Color.PINK);
+
+    }
+
 }

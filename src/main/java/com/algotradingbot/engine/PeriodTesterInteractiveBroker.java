@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.StrategyPerformance;
-import com.algotradingbot.strategies.BBbandWithComma;
+import com.algotradingbot.strategies.MWPatternStrategy;
 import com.algotradingbot.utils.CandleUtils;
 
 public class PeriodTesterInteractiveBroker {
@@ -34,25 +34,41 @@ public class PeriodTesterInteractiveBroker {
         try {
 
             ArrayList<Candle> candles = CandleUtils.normalizeFxCandles(fetcher.getCandles()); // תוסיף getter
-            if (candles.isEmpty()) {
-                System.err.println("❌ No candles received — chart cannot be created.");
-                return;
-            }
 
-            System.out.println("Candles received: " + candles.size());
-            System.out.println("First: " + candles.get(0).getDate() + "  Last: " + candles.get(candles.size() - 1).getDate());
 
-            // הרץ אסטרטגיה
-            BBbandWithComma strategy = new BBbandWithComma(candles);
-            strategy.runBackTest();
-            strategy.evaluateSignals();
-            StrategyPerformance perf = strategy.evaluatePerformance();
-            perf.print();
+            testTrendFollowStrategy(candles);
 
-            CandleChart.showChartFx(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance() , CandleChart.ChartOverlayMode.DIVERGENCE);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static StrategyPerformance testTrendFollowStrategy(ArrayList<Candle> candles) {
+        // בחר גודל סיכון לעסקה ויחס RR (משמש רק לחישוב גודל פוזיציה/דוח)
+        double riskPerTradeUSD = 20.0;
+        
+
+        MWPatternStrategy  strategy = new MWPatternStrategy (
+                candles,
+                riskPerTradeUSD
+                
+        );
+
+        strategy.runBackTest();
+        strategy.evaluateSignals();
+
+        StrategyPerformance perf = strategy.evaluatePerformance();
+
+        CandleChart.showChartFx(
+                strategy.getCandles(),
+                strategy.getSignals(),
+                perf.getCombinedPerformance(),
+                CandleChart.ChartOverlayMode.DIVERGENCE
+        );
+
+        perf.print();
+
+        return perf;
     }
 }

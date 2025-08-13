@@ -1,7 +1,0 @@
-"filename", "language", "XML", "Java", "comment", "blank", "total"
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\pom.xml", "XML", 5, 0, 0, -1, 4
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\App.java", "Java", 0, 0, 1, 0, 1
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\engine\GetDataFromInteractiveBroker.java", "Java", 0, 501, 90, 118, 709
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\engine\PeriodTester.java", "Java", 0, 0, 8, 2, 10
-"c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\strategies\OldInsideBarStrategy.java", "Java", 0, 9, 22, 0, 31
-"Total", "-", 5, 510, 121, 119, 755

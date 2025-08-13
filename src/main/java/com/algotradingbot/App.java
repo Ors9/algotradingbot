@@ -6,7 +6,7 @@ import com.algotradingbot.engine.PeriodTesterInteractiveBroker;
 public class App {
 
     public static void main(String[] args) {
-        BackTesterBinance();
+       // BackTesterBinance();
         BackTesterInteractiveBroker();
 
     }
@@ -28,12 +28,12 @@ public class App {
 
     public static void BackTesterInteractiveBroker() {
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
-                "EUR", // currency
-                "1 hour", // interval
-                "1 Y", // duration
-                "", // endDateTime ("" = now)
-                "127.0.0.1", // IP
-                7497 // port (TWS default)
+                "EUR",
+                "4 hours", 
+                "10 Y", 
+                "",
+                "127.0.0.1",
+                7497
         );
     }
 

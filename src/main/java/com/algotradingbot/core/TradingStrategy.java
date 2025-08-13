@@ -129,6 +129,8 @@ public abstract class TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 
+ 
+
     public Signal createBuySignalFromClose(int index, Candle curr) {
         double stopLossPct = 0.002;     // 1% מתחת לשפל
 
@@ -169,6 +171,51 @@ public abstract class TradingStrategy {
         double takeProfitPrice = entryPrice - (riskReward * riskPerUnit);
 
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
+    }
+
+// --- ATR-based LONG (entry at close) ---
+    public Signal createBuySignalATR(
+            int index, Candle curr,
+            double atr, double atrMult,
+            double riskReward) {
+
+        if (curr == null || atr <= 0 || Double.isNaN(atr) || atrMult <= 0) {
+            return null;
+        }
+
+        double entry = curr.getClose();                 // ✅ enter at close
+        double stop = entry - (atrMult * atr);         // SL below entry by ATR
+        double riskPerUnit = entry - stop;              // must be > 0
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double tp = entry + (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
+
+        // Signal(int index, double entryPrice, double tpPrice, double stopPrice, double riskUsd, boolean isLong)
+        return new Signal(index, entry, tp, stop, riskPerTradeUSD, true);
+    }
+
+// --- ATR-based SHORT (entry at close) ---
+    public Signal createSellSignalATR(
+            int index, Candle curr,
+            double atr, double atrMult,
+            double riskReward) {
+
+        if (curr == null || atr <= 0 || Double.isNaN(atr) || atrMult <= 0) {
+            return null;
+        }
+
+        double entry = curr.getClose();                 // ✅ enter at close
+        double stop = entry + (atrMult * atr);         // SL above entry by ATR
+        double riskPerUnit = stop - entry;              // must be > 0
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double tp = entry - (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
+
+        return new Signal(index, entry, tp, stop, riskPerTradeUSD, false);
     }
 
 }
