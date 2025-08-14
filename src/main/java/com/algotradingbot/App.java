@@ -6,8 +6,8 @@ import com.algotradingbot.engine.PeriodTesterInteractiveBroker;
 public class App {
 
     public static void main(String[] args) {
-       BackTesterBinance();
-       BackTesterInteractiveBroker();
+        //BackTesterBinance();
+        BackTesterInteractiveBroker();
 
     }
 
@@ -27,14 +27,31 @@ public class App {
     }
 
     public static void BackTesterInteractiveBroker() {
+
+                /*
+        =========================================
+        📌 זוגות מט"ח זמינים בד"כ ב-IBKR Demo
+        (ללא חבילת נתונים בתשלום)
+        =========================================
+
+        Majors:
+            EURUSD
+            USDJPY
+            GBPUSD
+            USDCHF
+            AUDUSD
+            USDCAD
+            NZDUSD
+                */
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
-                "EUR",
-                "4 hours", 
-                "10 Y", 
+                "USDJPY", // או כל זוג נתמך
+                "4 hours",
+                "1 Y",
                 "",
                 "127.0.0.1",
                 7497
         );
+
     }
 
 }

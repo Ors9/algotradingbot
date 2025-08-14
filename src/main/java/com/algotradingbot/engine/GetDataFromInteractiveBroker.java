@@ -61,7 +61,7 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     private volatile boolean rangeRunnerStarted = false;
     private final java.util.concurrent.CountDownLatch allDone = new java.util.concurrent.CountDownLatch(1);
     // AFTER:
-    private static final String BATCH_DURATION = "10 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
+    private static final String BATCH_DURATION = "1 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
 
     private final String currency;
     private final String timeFrame;
@@ -244,11 +244,28 @@ public class GetDataFromInteractiveBroker implements EWrapper {
         }
     }
 
-    private Contract buildFxContract(String base) {
+    private static final Set<String> FIAT = Set.of(
+            "USD", "EUR", "GBP", "JPY", "CHF", "AUD", "CAD", "NZD", "SEK", "NOK", "DKK", "HKD", "SGD", "ILS", "ZAR", "MXN", "CNY"
+    );
+
+    private Contract buildFxContract(String pair) {
+        String s = pair.replace("/", "").trim().toUpperCase();
+
+        if (s.length() != 6) {
+            throw new IllegalArgumentException("Forex pair must be 6 letters, e.g., EURUSD");
+        }
+
+        String base = s.substring(0, 3);
+        String quote = s.substring(3, 6);
+
+        if (!FIAT.contains(base) || !FIAT.contains(quote)) {
+            throw new IllegalArgumentException("Unsupported forex pair: " + pair);
+        }
+
         Contract c = new Contract();
-        c.symbol(base);         // e.g., "EUR"
+        c.symbol(base);
         c.secType("CASH");
-        c.currency("USD");
+        c.currency(quote);
         c.exchange("IDEALPRO");
         return c;
     }
