@@ -40,7 +40,7 @@ public class PeriodTesterInteractiveBroker {
             ArrayList<Candle> candles = CandleUtils.normalizeFxCandles(fetcher.getCandles()); // תוסיף getter
 
             testMWPatternStrategy(candles);
-            testBBbandWithCommaStrategy(candles);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

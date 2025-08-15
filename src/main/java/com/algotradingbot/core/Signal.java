@@ -84,20 +84,20 @@ public class Signal {
 
             if (signal.isLong()) {
                 // LONG: רוצים שהמחיר יעלה
-                if (c.getHigh() >= signal.getTpPrice()) {
-                    signal.setWinSignal(true);
-                    return;
-                } else if (c.getLow() <= signal.getStopPrice()) {
+                if (c.getLow() <= signal.getStopPrice()) {
                     signal.setWinSignal(false);
+                    return;
+                } else if (c.getHigh() >= signal.getTpPrice()) {
+                    signal.setWinSignal(true);
                     return;
                 }
             } else {
                 // SHORT: רוצים שהמחיר ירד
-                if (c.getLow() <= signal.getTpPrice()) {
-                    signal.setWinSignal(true);
-                    return;
-                } else if (c.getHigh() >= signal.getStopPrice()) {
+                if (c.getHigh() >= signal.getStopPrice()) {
                     signal.setWinSignal(false);
+                    return;
+                } else if (c.getLow() <= signal.getTpPrice()) {
+                    signal.setWinSignal(true);
                     return;
                 }
             }

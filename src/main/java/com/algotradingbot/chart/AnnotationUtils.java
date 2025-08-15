@@ -90,7 +90,7 @@ public class AnnotationUtils {
             // טקסט מעל חץ כניסה - מידע מפורט כולל WIN/LOSS
             String entryInfo = String.format("Entry: %.2f | TP: %.2f | Stop: %.2f | %s",
                     signal.getEntryPrice(), signal.getTpPrice(), signal.getStopPrice(), winLossText);
-            XYTextAnnotation entryText = new XYTextAnnotation(entryInfo, x, signal.getEntryPrice() + 0.5);
+            XYTextAnnotation entryText = new XYTextAnnotation(entryInfo, x, signal.getEntryPrice());
             entryText.setFont(new Font("Arial", Font.PLAIN, 10));
             entryText.setPaint(winLossColor);
             entryText.setTextAnchor(org.jfree.chart.ui.TextAnchor.BOTTOM_CENTER);
@@ -114,7 +114,7 @@ public class AnnotationUtils {
 
             // טקסט נוסף: התאריך
             String dateText = candle.getDate(); // כבר בפורמט "dd/MM/yyyy HH:mm"
-            XYTextAnnotation dateAnnotation = new XYTextAnnotation(dateText, x, signal.getEntryPrice() - 0.5);
+            XYTextAnnotation dateAnnotation = new XYTextAnnotation(dateText, x, signal.getEntryPrice());
             dateAnnotation.setFont(new Font("Arial", Font.ITALIC, 9));
             dateAnnotation.setPaint(Color.DARK_GRAY);
             dateAnnotation.setTextAnchor(org.jfree.chart.ui.TextAnchor.TOP_CENTER);

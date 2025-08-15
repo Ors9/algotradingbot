@@ -31,6 +31,8 @@ public abstract class TradingStrategy {
         return candles;
     }
 
+    
+
     public StrategyPerformance evaluatePerformance() {
         // Long performance variables
         int longWins = 0, longLosses = 0;
@@ -129,8 +131,6 @@ public abstract class TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 
- 
-
     public Signal createBuySignalFromClose(int index, Candle curr) {
         double stopLossPct = 0.002;     // 1% מתחת לשפל
 
@@ -196,24 +196,34 @@ public abstract class TradingStrategy {
         return new Signal(index, entry, tp, stop, riskPerTradeUSD, true);
     }
 
-// --- ATR-based SHORT (entry at close) ---
-    public Signal createSellSignalATR(
+    // EURUSD-only (pip = 0.0001)
+    public Signal createSellSignalATR_EURUSD(
             int index, Candle curr,
-            double atr, double atrMult,
+            double atrPrice, // ATR ביחידות מחיר (e.g., 0.0006 ≈ 6 pips)
+            double atrMult,
             double riskReward) {
 
-        if (curr == null || atr <= 0 || Double.isNaN(atr) || atrMult <= 0) {
+        if (curr == null || atrPrice <= 0 || Double.isNaN(atrPrice) || atrMult <= 0) {
             return null;
         }
 
-        double entry = curr.getClose();                 // ✅ enter at close
-        double stop = entry + (atrMult * atr);         // SL above entry by ATR
-        double riskPerUnit = stop - entry;              // must be > 0
+        final double PIP = 0.0001;         // EURUSD pip size
+        final double MIN_STOP_PIPS = 15;   // רצפת סטופ סבירה ל־1H/4H; שנה לפי טיימפריים
+        // final double ENTRY_BUFFER_PIPS = 0; // אם תרצה בופר לכניסה
+
+        double entry = curr.getClose(); // כניסה ב־close ל־SHORT; אפשר להפחית ENTRY_BUFFER_PIPS*PIP אם רוצים
+
+        // המרה ממחיר→pips (אם ה-ATR אצלך כבר ב-pips, החלף ל: double atrPips = atrPrice;)
+        double atrPips = atrPrice / PIP;
+
+        double stopDistancePips = Math.max(atrPips * atrMult, MIN_STOP_PIPS);
+        double stop = entry + stopDistancePips * PIP;  // סטופ מעל הכניסה (SHORT)
+        double riskPerUnit = stop - entry;
         if (riskPerUnit <= 0) {
             return null;
         }
 
-        double tp = entry - (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
+        double tp = entry - (riskReward * riskPerUnit); // RR (למשל 1.0 עבור 1:1)
 
         return new Signal(index, entry, tp, stop, riskPerTradeUSD, false);
     }
