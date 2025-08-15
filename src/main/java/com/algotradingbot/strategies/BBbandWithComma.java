@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
-import com.algotradingbot.utils.BollingerBands.BBPeriod;
 import com.algotradingbot.utils.CandleUtils;
 import com.algotradingbot.utils.FilterRejectionTracker;
 import com.algotradingbot.utils.TimeUtils;
@@ -29,7 +28,7 @@ public class BBbandWithComma extends TradingStrategy {
     public BBbandWithComma(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
-        this.riskReward = 1;
+        this.riskReward = 2;
         tracker = new FilterRejectionTracker();
     }
 
@@ -57,12 +56,12 @@ public class BBbandWithComma extends TradingStrategy {
 
         boolean hasTrend = TrendUtils.isHighTimeFrameCommaForPeriod(candles, index, COMMA_EMA_PERIOD);
 
-        boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, BBPeriod.BB_22.getPeriod());
+        boolean touchesLowerBB = TrendUtils.isTouchingLowerBB(candles, index, TrendUtils.BBPeriod.BB_22.getPeriod() , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
         boolean strongWick = CandleUtils.isGreenWithStrongLowerWick(cur, STRONG_WICK_FACTOR);
         boolean isTradingDay = !TimeUtils.isSaturday(cur.getDate()) && !TimeUtils.isSunday(cur.getDate()) && TimeUtils.isTradingHour(cur.getDate());
         boolean isBullishEng = CandleUtils.isBullishEngulfing(prev, cur);
         boolean isGreenInsideBar = CandleUtils.isInsideBar(prev, cur) && CandleUtils.isGreen(cur) && CandleUtils.hasStrongBody(cur);
-        boolean rsiCloseAndRsiOB = TrendUtils.isNearLowerBB(candles, index, BBPeriod.BB_22.getPeriod(), BB_PROXIMITY_THRESHOLD)
+        boolean rsiCloseAndRsiOB = TrendUtils.isNearLowerBB(candles, index, TrendUtils.BBPeriod.BB_22.getPeriod(), BB_PROXIMITY_THRESHOLD ,  TrendUtils.BBStdDev.STD_2_0.getMultiplier())
                 && TrendUtils.calculateRSI(candles, index, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue()) <= TrendUtils.RSILevel.OVERBOUGHT.getValue() && isBullishEng;
 
         if (!isTradingDay) {

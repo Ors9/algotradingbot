@@ -6,7 +6,7 @@ import com.algotradingbot.engine.PeriodTesterInteractiveBroker;
 public class App {
 
     public static void main(String[] args) {
-        BackTesterBinance();
+        //BackTesterBinance();
         BackTesterInteractiveBroker();
 
     }

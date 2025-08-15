@@ -10,8 +10,11 @@ import com.algotradingbot.core.Candle;
 public class TrendUtils {
 
     public enum RSILevel {
+        OVERSOLD_25(25),
         OVERSOLD(30),
         OVERBOUGHT(70),
+        OVERBOUGHT_75(75),
+        RSI_PERIOD_10(10),
         RSI_PERIOD_14(14),
         RSI_PERIOD_21(14);
 
@@ -23,6 +26,42 @@ public class TrendUtils {
 
         public double getValue() {
             return value;
+        }
+    }
+
+    public enum BBPeriod {
+        BB_20(20),
+        BB_22(22),
+        BB_25(25),
+        BB_50(50),
+        BB_100(100),
+        BB_200(200);
+
+        private final int period;
+
+        BBPeriod(int period) {
+            this.period = period;
+        }
+
+        public int getPeriod() {
+            return period;
+        }
+    }
+
+    public enum BBStdDev {
+        STD_2_0(2.0),
+        STD_2_5(2.5),
+        STD_2_7(2.7),
+        STD_2_9(2.9);
+
+        private final double multiplier;
+
+        BBStdDev(double multiplier) {
+            this.multiplier = multiplier;
+        }
+
+        public double getMultiplier() {
+            return multiplier;
         }
     }
 
@@ -338,8 +377,8 @@ public class TrendUtils {
 
     }
 
-    public static boolean isNearLowerBB(List<Candle> candles, int index, int period, double maxFracOfBand) {
-        BollingerBands bb = getBollingerBands(candles, index, period);
+    public static boolean isNearLowerBB(List<Candle> candles, int index, int period, double maxFracOfBand , double multiplier) {
+        BollingerBands bb = getBollingerBands(candles, index, period, multiplier);
         if (bb == null) {
             return false;
         }
@@ -352,12 +391,12 @@ public class TrendUtils {
         return distFromLower >= 0 && (distFromLower / bandWidth) <= maxFracOfBand; // “כמעט־נגיעה”
     }
 
-    public static boolean isTouchingLowerBB(List<Candle> candles, int index, int period) {
+    public static boolean isTouchingLowerBB(List<Candle> candles, int index, int period , double multiplier) {
         if (index < period - 1) {
             return false; // Not enough candles
         }
 
-        BollingerBands bb = getBollingerBands(candles, index, period);
+        BollingerBands bb = getBollingerBands(candles, index, period , multiplier);
         if (bb == null) {
             return false;
         }
@@ -366,28 +405,14 @@ public class TrendUtils {
         return candle.getLow() <= bb.getLower(); // נוגע או מתחת
     }
 
-    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period) {
-        if (index < period - 1) {
-            return false; // Not enough candles
-        }
-
-        BollingerBands bb = getBollingerBands(candles, index, period);
-        if (bb == null) {
-            return false;
-        }
-
-        Candle candle = candles.get(index);
-        return candle.getHigh() >= bb.getUpper(); // נוגע או מעל
-    }
-
-    public static BollingerBands getBollingerBands(List<Candle> candles, int index, int period) {
+    public static BollingerBands getBollingerBands(List<Candle> candles, int index, int period, double multiplier) {
         if (index < period - 1) {
             return null; // Not enough candles
         }
 
         double sma;
         try {
-            sma = calculateSMA(new ArrayList<>(candles), index, period); // נדרש cast כי calculateSMA מקבלת ArrayList
+            sma = calculateSMA(new ArrayList<>(candles), index, period);
         } catch (Exception e) {
             return null;
         }
@@ -399,10 +424,24 @@ public class TrendUtils {
         }
         double stdDev = Math.sqrt(variance / period);
 
-        double upper = sma + 2 * stdDev;
-        double lower = sma - 2 * stdDev;
+        double upper = sma + multiplier * stdDev;  // במקום 2
+        double lower = sma - multiplier * stdDev;  // במקום 2
 
         return new BollingerBands(sma, upper, lower);
+    }
+
+    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period , double multiplier) {
+        if (index < period - 1) {
+            return false; // Not enough candles
+        }
+
+        BollingerBands bb = getBollingerBands(candles, index, period , multiplier);
+        if (bb == null) {
+            return false;
+        }
+
+        Candle candle = candles.get(index);
+        return candle.getHigh() >= bb.getUpper(); // נוגע או מעל
     }
 
     public static Double calculateRSI(List<Candle> candles, int index, int period) {

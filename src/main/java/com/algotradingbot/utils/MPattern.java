@@ -25,12 +25,12 @@ public class MPattern {
             return false;
         }
 
-        int bbPeriod = BollingerBands.BBPeriod.BB_20.getPeriod();
+        int bbPeriod = TrendUtils.BBPeriod.BB_20.getPeriod();
 
         Candle lastCandle = candles.get(currIndex);
 
         // (0) H2 חייב לגעת Upper BB
-        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod)) {
+        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod , TrendUtils.BBStdDev.STD_2_0.getMultiplier())) {
             return false;
         }
 
@@ -70,7 +70,7 @@ public class MPattern {
             if (lastCandle.getHigh() <= curr.getHigh()) {
                 return false;
             }
-            double currRsi = TrendUtils.calculateRSI(candles, i, (int)TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
+            double currRsi = TrendUtils.calculateRSI(candles, i, (int)TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
             rsiMax =Math.max( rsiMax , currRsi);
 
             
@@ -80,13 +80,13 @@ public class MPattern {
 
         }
 
-        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, (int)TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
+        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, (int)TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
 
         if(rsiMax < rsiLast){
             return false;
         }
 
-        return firstLegCandle != null && rsiMax >= TrendUtils.RSILevel.OVERBOUGHT.getValue();
+        return firstLegCandle != null && rsiMax >= TrendUtils.RSILevel.OVERBOUGHT_75.getValue();
     }
 
 }

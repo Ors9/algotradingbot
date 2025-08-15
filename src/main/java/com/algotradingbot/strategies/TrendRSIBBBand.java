@@ -14,7 +14,6 @@ import com.algotradingbot.utils.TrendUtils;
 public class TrendRSIBBBand extends TradingStrategy {
 
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
-    private final int BOLLINGER_PERIOD = 20;
     private final int RSI_PERIOD = 14;
     private FilterRejectionTracker tracker;
 
@@ -55,8 +54,8 @@ public class TrendRSIBBBand extends TradingStrategy {
             return false;
         }
 
-        BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
-        BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD + 5);
+        BollingerBands bb = TrendUtils.getBollingerBands(candles, index, TrendUtils.BBPeriod.BB_20.getPeriod() , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
+        BollingerBands bbBig = TrendUtils.getBollingerBands(candles, index, TrendUtils.BBPeriod.BB_25.getPeriod() , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
 
         double touchThresholdSmall = bb.getLower() * 1.03;   // 3% מעל התחתון
         double touchThresholdBig = bbBig.getLower() * 1.05; // 5% מעל התחתון הגדול
@@ -107,7 +106,7 @@ public class TrendRSIBBBand extends TradingStrategy {
         }
 
         // נבדוק פריצה של רצועת עליונה ואז חזרה
-        BollingerBands bb = TrendUtils.getBollingerBands(candles, index, BOLLINGER_PERIOD);
+        BollingerBands bb = TrendUtils.getBollingerBands(candles, index, TrendUtils.BBPeriod.BB_20.getPeriod() , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
         double upper = bb.getUpper();
 
         boolean fakeout = prev.getHigh() > upper && curr.getClose() < upper;

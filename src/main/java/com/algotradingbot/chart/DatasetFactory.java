@@ -58,7 +58,7 @@ public class DatasetFactory {
     public static TimeSeriesCollection createBollingerSeries(ArrayList<Candle> candles, int period, String type) {
         TimeSeries series = new TimeSeries(type);
         for (int i = period - 1; i < candles.size(); i++) {
-            BollingerBands bb = TrendUtils.getBollingerBands(candles, i, period);
+            BollingerBands bb = TrendUtils.getBollingerBands(candles, i, period , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
             if (bb != null) {
                 LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
                 Minute time = new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
@@ -113,7 +113,7 @@ public class DatasetFactory {
         TimeSeries middle = new TimeSeries("Middle Band");
 
         for (int i = period - 1; i < candles.size(); i++) {
-            BollingerBands bb = TrendUtils.getBollingerBands(candles, i, period);
+            BollingerBands bb = TrendUtils.getBollingerBands(candles, i, period , TrendUtils.BBStdDev.STD_2_0.getMultiplier());
             if (bb != null) {
                 LocalDateTime ldt = LocalDateTime.parse(candles.get(i).getDate(), FORMATTER);
                 Minute time = new Minute(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));

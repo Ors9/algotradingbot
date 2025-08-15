@@ -7,7 +7,6 @@ import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
 
 import com.algotradingbot.core.Candle;
-import com.algotradingbot.utils.BollingerBands;
 import com.algotradingbot.utils.TrendUtils;
 
 public class StrategyChartUtils {
@@ -25,7 +24,7 @@ public class StrategyChartUtils {
         AnnotationUtils.addSMAtoCandlePlot(candlePlot, candles, TrendUtils.SMAType.SMA_200.getPeriod(), index++, Color.RED);
 
         // Add Bollinger Bands
-        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_20.getPeriod(), index++);
+        AnnotationUtils.addBollingerBands(candlePlot, candles, TrendUtils.BBPeriod.BB_20.getPeriod(), index++);
 
         // Add RSI
         XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
@@ -38,7 +37,7 @@ public class StrategyChartUtils {
         // Add SMA
 
         // Add Bollinger Bands
-        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_20.getPeriod(), index++);
+        AnnotationUtils.addBollingerBands(candlePlot, candles, TrendUtils.BBPeriod.BB_20.getPeriod(), index++);
 
         // Add RSI
         XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
@@ -58,7 +57,7 @@ public class StrategyChartUtils {
         AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_240.getPeriod(), index++, Color.PINK);
 
         // Add Bollinger Bands
-        AnnotationUtils.addBollingerBands(candlePlot, candles, BollingerBands.BBPeriod.BB_22.getPeriod(), index++);
+        AnnotationUtils.addBollingerBands(candlePlot, candles, TrendUtils.BBPeriod.BB_22.getPeriod(), index++);
 
     }
 
