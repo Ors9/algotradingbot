@@ -12,9 +12,9 @@ public class MWPatternStrategy extends TradingStrategy {
 
 
     private static final int START_PERIOD = 50;
-    private static final int ATR_PERIOD = 14;
-    private static final double RR_RATIO = 1.0;   // 1:1
-    private static final double ATR_MULT = 1.0;   // כמה ATR לשים לסטופ
+    private static final int ATR_PERIOD = 10;
+    private static final double RR_RATIO = 0.8;   // 1:1
+    private static final double ATR_MULT = 2.0;   // כמה ATR לשים לסטופ
    
 
     public MWPatternStrategy(ArrayList<Candle> candles, double riskPerTradeUSD) {
