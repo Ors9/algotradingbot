@@ -58,7 +58,7 @@ public class PeriodTesterInteractiveBroker {
         strategy.runBackTest();
         strategy.evaluateSignals();
 
-        StrategyPerformance perf = strategy.evaluatePerformance();
+        StrategyPerformance perf = strategy.evaluatePerformanceEURUSD();
 
         CandleChart.showChartFx(
                 strategy.getCandles(),
@@ -81,7 +81,7 @@ public class PeriodTesterInteractiveBroker {
         strategy.runBackTest();
         strategy.evaluateSignals();
 
-        StrategyPerformance perf = strategy.evaluatePerformance();
+        StrategyPerformance perf = strategy.evaluatePerformanceEURUSD();
 
         CandleChart.showChartFx(
                 strategy.getCandles(),

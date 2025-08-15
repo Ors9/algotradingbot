@@ -31,7 +31,73 @@ public abstract class TradingStrategy {
         return candles;
     }
 
-    
+    public StrategyPerformance evaluatePerformanceEURUSD() {
+        // Long performance variables
+        int longWins = 0, longLosses = 0;
+        double longProfit = 0, longBalance = 0, longPeak = 0, longMaxDD = 0;
+
+        final double FIXED_FEE_PER_TRADE = 1.0;
+
+        // Short performance variables
+        int shortWins = 0, shortLosses = 0;
+        double shortProfit = 0, shortBalance = 0, shortPeak = 0, shortMaxDD = 0;
+
+
+        for (Signal signal : signals) {
+            if (!signal.isEvaluated()) {
+                continue;
+            }
+
+            double stopSize = Math.abs(signal.getEntryPrice() - signal.getStopPrice());
+            if (stopSize == 0) {
+                continue;
+            }
+
+            double positionSize = riskPerTradeUSD / stopSize;
+
+            double entry = signal.getEntryPrice();
+            double exit = signal.isWinSignal() ? signal.getTpPrice() : signal.getStopPrice();
+            double profit;
+
+            if (signal.isLong()) {
+                profit = (exit - entry) * positionSize;
+            } else {
+                profit = (entry - exit) * positionSize;
+            }
+
+            profit -= FIXED_FEE_PER_TRADE;
+
+            // Update per direction
+            if (signal.isLong()) {
+                longBalance += profit;
+                longPeak = Math.max(longPeak, longBalance);
+                longMaxDD = Math.max(longMaxDD, longPeak - longBalance);
+                longProfit += profit;
+
+                if (signal.isWinSignal()) {
+                    longWins++;
+                } else {
+                    longLosses++;
+                }
+            } else {
+                shortBalance += profit;
+                shortPeak = Math.max(shortPeak, shortBalance);
+                shortMaxDD = Math.max(shortMaxDD, shortPeak - shortBalance);
+                shortProfit += profit;
+
+                if (signal.isWinSignal()) {
+                    shortWins++;
+                } else {
+                    shortLosses++;
+                }
+            }
+        }
+
+        Performance longPerf = new Performance(longWins, longLosses, longProfit, longMaxDD);
+        Performance shortPerf = new Performance(shortWins, shortLosses, shortProfit, shortMaxDD);
+
+        return new StrategyPerformance(longPerf, shortPerf);
+    }
 
     public StrategyPerformance evaluatePerformance() {
         // Long performance variables
