@@ -63,8 +63,9 @@ public class MPattern {
             return false;
         }
 
-        //Try looking for Exausted market all 50 candles close  above the 50 ema
-        for(int i = currIndex ; i > currIndex - patternSizeMax ; i--){
+        //Try looking for Exausted market all 70 candles close  above the 50 ema
+        int numberOfCandlesAboveEma  = 70;
+        for(int i = currIndex ; i > currIndex - numberOfCandlesAboveEma ; i--){
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);
             if(currEma == null || curr.getClose() < currEma){
@@ -79,7 +80,7 @@ public class MPattern {
             if (lastCandle.getHigh() <= curr.getHigh()) {
                 return false;
             }
-            double currRsi = TrendUtils.calculateRSI(candles, i, (int)TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+            double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
             rsiMax =Math.max( rsiMax , currRsi);
 
             
@@ -89,7 +90,7 @@ public class MPattern {
 
         }
 
-        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, (int)TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
 
         if(rsiMax < rsiLast){
             return false;

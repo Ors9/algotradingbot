@@ -18,13 +18,13 @@ public class TrendUtils {
         RSI_PERIOD_14(14),
         RSI_PERIOD_21(14);
 
-        private final double value;
+        private final int value;
 
-        RSILevel(double value) {
+        RSILevel(int value) {
             this.value = value;
         }
 
-        public double getValue() {
+        public int getValue() {
             return value;
         }
     }
