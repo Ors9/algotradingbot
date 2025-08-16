@@ -34,7 +34,7 @@ public class TrendRSIBBBand extends TradingStrategy {
                 signals.add(signal);
             }
             /*Doesnt Suit for Short!!!!!!! */
- /*if (strategyValidShort(i)) {
+            /*if (strategyValidShort(i)) {
                 Candle curr = candles.get(i);
                 Signal signal = createSellSignal(i, curr); // שיטה קיימת מה־TradingStrategy
                 signals.add(signal);

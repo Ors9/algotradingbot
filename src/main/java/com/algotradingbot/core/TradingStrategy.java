@@ -42,7 +42,6 @@ public abstract class TradingStrategy {
         int shortWins = 0, shortLosses = 0;
         double shortProfit = 0, shortBalance = 0, shortPeak = 0, shortMaxDD = 0;
 
-
         for (Signal signal : signals) {
             if (!signal.isEvaluated()) {
                 continue;
@@ -262,8 +261,11 @@ public abstract class TradingStrategy {
         return new Signal(index, entry, tp, stop, riskPerTradeUSD, true);
     }
 
-    // EURUSD-only (pip = 0.0001)
-    public Signal createSellSignalATR_EURUSD(
+    /*
+    good for majors pip 0.0001 
+    EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF
+     */
+    public Signal createSellSignalATR_MajorForex(
             int index, Candle curr,
             double atrPrice, // ATR ביחידות מחיר (e.g., 0.0006 ≈ 6 pips)
             double atrMult,
@@ -292,6 +294,41 @@ public abstract class TradingStrategy {
         double tp = entry - (riskReward * riskPerUnit); // RR (למשל 1.0 עבור 1:1)
 
         return new Signal(index, entry, tp, stop, riskPerTradeUSD, false);
+    }
+
+    /*
+    good for majors pip 0.0001 
+    EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF
+     */
+    public Signal createBuySignalATR_MajorForex(
+            int index, Candle curr,
+            double atrPrice, // ATR in price units (e.g., 0.0006 ≈ 6 pips)
+            double atrMult,
+            double riskReward) {
+
+        if (curr == null || atrPrice <= 0 || Double.isNaN(atrPrice) || atrMult <= 0) {
+            return null;
+        }
+
+        final double PIP = 0.0001;         // EURUSD pip size
+        final double MIN_STOP_PIPS = 15;   // floor for 1H/4H; tune per timeframe
+        // final double ENTRY_BUFFER_PIPS = 0; // if you want a buffer on entry
+
+        double entry = curr.getClose(); // enter at close for LONG
+
+        // Convert ATR price → pips (if your ATR is already pips, use it directly)
+        double atrPips = atrPrice / PIP;
+
+        double stopDistancePips = Math.max(atrPips * atrMult, MIN_STOP_PIPS);
+        double stop = entry - stopDistancePips * PIP;  // stop below entry (LONG)
+        double riskPerUnit = entry - stop;
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+
+        double tp = entry + (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
+
+        return new Signal(index, entry, tp, stop, riskPerTradeUSD, true);
     }
 
 }

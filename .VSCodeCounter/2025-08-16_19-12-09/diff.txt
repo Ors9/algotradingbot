@@ -1,0 +1,45 @@
+Date : 2025-08-16 19:12:09
+Directory : c:\Users\ASUS\VSCode\MyCodes\algotradingbot
+Total : 11 files,  106 codes, 36 comments, 36 blanks, all 178 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| Java     |         11 |        106 |         36 |         36 |        178 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                   | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                      |         11 |        106 |         36 |         36 |        178 |
+| src                                                                                                                    |         11 |        106 |         36 |         36 |        178 |
+| src\main                                                                                                               |         11 |        106 |         36 |         36 |        178 |
+| src\main\java                                                                                                          |         11 |        106 |         36 |         36 |        178 |
+| src\main\java\com                                                                                                      |         11 |        106 |         36 |         36 |        178 |
+| src\main\java\com\algotradingbot                                                                                       |         11 |        106 |         36 |         36 |        178 |
+| src\main\java\com\algotradingbot (Files)                                                                               |          1 |          0 |         15 |          2 |         17 |
+| src\main\java\com\algotradingbot\core                                                                                  |          1 |         55 |          5 |         16 |         76 |
+| src\main\java\com\algotradingbot\engine                                                                                |          2 |         28 |          1 |         11 |         40 |
+| src\main\java\com\algotradingbot\strategies                                                                            |          3 |         -6 |          0 |          2 |         -4 |
+| src\main\java\com\algotradingbot\utils                                                                                 |          4 |         29 |         15 |          5 |         49 |
++------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                               | language | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\App.java                                  | Java     |          0 |         15 |          2 |         17 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\core\TradingStrategy.java                 | Java     |         55 |          5 |         16 |         76 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\engine\GetDataFromInteractiveBroker.java  | Java     |         12 |          0 |          5 |         17 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\engine\PeriodTesterInteractiveBroker.java | Java     |         16 |          1 |          6 |         23 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\strategies\BBbandWithComma.java           | Java     |         -1 |          0 |          0 |         -1 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\strategies\MWPatternStrategy.java         | Java     |         -4 |          0 |          2 |         -2 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\strategies\TrendRSIBBBand.java            | Java     |         -1 |          0 |          0 |         -1 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\BollingerBands.java                 | Java     |        -14 |          0 |         -3 |        -17 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\Instrument.java                     | Java     |         39 |          8 |          7 |         54 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\MPattern.java                       | Java     |        -27 |          7 |         -7 |        -27 |
+| c:\Users\ASUS\VSCode\MyCodes\algotradingbot\src\main\java\com\algotradingbot\utils\TrendUtils.java                     | Java     |         31 |          0 |          8 |         39 |
+| Total                                                                                                                  |          |        106 |         36 |         36 |        178 |
++------------------------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
