@@ -27,20 +27,22 @@ public class StrategyChartUtils {
         AnnotationUtils.addBollingerBands(candlePlot, candles, TrendUtils.BBPeriod.BB_20.getPeriod(), index++);
 
         // Add RSI
-        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
+        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
         combinedPlot.add(rsiPlot, 2);
     }
 
     public static void DivergenceStrategyUtils(XYPlot candlePlot, CombinedDomainXYPlot combinedPlot,
             ArrayList<Candle> candles, int smaStartIndex) {
         int index = smaStartIndex;
-        // Add SMA
 
         // Add Bollinger Bands
         AnnotationUtils.addBollingerBands(candlePlot, candles, TrendUtils.BBPeriod.BB_20.getPeriod(), index++);
 
+        // Add EMA 50
+        AnnotationUtils.addEMAtoCandlePlot(candlePlot, candles, TrendUtils.EMAType.EMA_50.getPeriod(), index++, Color.RED);
+
         // Add RSI
-        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, (int) TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
+        XYPlot rsiPlot = PlotFactory.createRSIPlot(candles, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
         combinedPlot.add(rsiPlot, 2);
     }
 
@@ -61,8 +63,7 @@ public class StrategyChartUtils {
 
     }
 
-
-        /**
+    /**
      * אסטרטגיה: BB + 4 EMA ("Comma")
      */
     public static void TrendFollowStrategyUtils(XYPlot candlePlot, ArrayList<Candle> candles, int startIndex) {

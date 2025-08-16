@@ -4,6 +4,19 @@ import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
 
+/*
+ * M Pattern tested on 4H EURUSD
+
+    1. Last candle must touch the upper Bollinger Band (20, 2.0).
+    2. Last candle must be the highest high within the lookback window (50 bars).
+    3. At least one candle before must close below SMA20 (pullback required).
+    4. The last 70 candles must all close above EMA50 (exhausted market condition).
+    5. RSI max (period 10) between pullback and last candle must be recorded.
+    6. Last candle’s RSI must be lower than the previous RSI max.
+    7. The RSI max must be ≥ 75 (overbought).
+
+ * 
+ */
 public class MPattern {
 
     private final ArrayList<Candle> candles;
@@ -30,7 +43,7 @@ public class MPattern {
         Candle lastCandle = candles.get(currIndex);
 
         // (0) H2 חייב לגעת Upper BB
-        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod , TrendUtils.BBStdDev.STD_2_0.getMultiplier())) {
+        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod, TrendUtils.BBStdDev.STD_2_0.getMultiplier())) {
             return false;
         }
 
@@ -64,11 +77,11 @@ public class MPattern {
         }
 
         //Try looking for Exausted market all 70 candles close  above the 50 ema
-        int numberOfCandlesAboveEma  = 70;
-        for(int i = currIndex ; i > currIndex - numberOfCandlesAboveEma ; i--){
+        int numberOfCandlesAboveEma = 70;
+        for (int i = currIndex; i > currIndex - numberOfCandlesAboveEma; i--) {
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);
-            if(currEma == null || curr.getClose() < currEma){
+            if (currEma == null || curr.getClose() < currEma) {
                 return false;
             }
         }
@@ -81,10 +94,9 @@ public class MPattern {
                 return false;
             }
             double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
-            rsiMax =Math.max( rsiMax , currRsi);
+            rsiMax = Math.max(rsiMax, currRsi);
 
-            
-            if(firstLegCandle == null || firstLegCandle.getHigh() <= curr.getHigh()){
+            if (firstLegCandle == null || firstLegCandle.getHigh() <= curr.getHigh()) {
                 firstLegCandle = curr;
             }
 
@@ -92,7 +104,7 @@ public class MPattern {
 
         double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
 
-        if(rsiMax < rsiLast){
+        if (rsiMax < rsiLast) {
             return false;
         }
 
