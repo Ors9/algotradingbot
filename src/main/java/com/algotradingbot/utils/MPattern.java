@@ -63,6 +63,15 @@ public class MPattern {
             return false;
         }
 
+        //Try looking for Exausted market all 50 candles close  above the 50 ema
+        for(int i = currIndex ; i > currIndex - patternSizeMax ; i--){
+            Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
+            Candle curr = candles.get(i);
+            if(currEma == null || curr.getClose() < currEma){
+                return false;
+            }
+        }
+
         double rsiMax = -1;
         for (int i = candleThatFoundPullBack - 1; i > currIndex - patternSizeMax; i--) {
             Candle curr = candles.get(i);

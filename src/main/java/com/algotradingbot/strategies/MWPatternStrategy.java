@@ -11,7 +11,7 @@ import com.algotradingbot.utils.TrendUtils;
 public class MWPatternStrategy extends TradingStrategy {
 
 
-    private static final int START_PERIOD = 50;
+    private static final int START_PERIOD = 70;
     private static final int ATR_PERIOD = 10;
     private static final double RR_RATIO = 0.8;   // 1:1
     private static final double ATR_MULT = 2.0;   // כמה ATR לשים לסטופ

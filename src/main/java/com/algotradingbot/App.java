@@ -46,7 +46,7 @@ public class App {
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
                 "EURUSD", // או כל זוג נתמך
                 "4 hours",
-                "1 Y",
+                "10 Y",
                 "",
                 "127.0.0.1",
                 7497

@@ -61,7 +61,7 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     private volatile boolean rangeRunnerStarted = false;
     private final java.util.concurrent.CountDownLatch allDone = new java.util.concurrent.CountDownLatch(1);
     // AFTER:
-    private static final String BATCH_DURATION = "1 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
+    private static final String BATCH_DURATION = "10 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
 
     private final String currency;
     private final String timeFrame;
