@@ -17,7 +17,7 @@ public class PeriodTesterBinance {
         System.out.printf("Period: %s ➝ %s\n", sdf.format(new Date(start)), sdf.format(new Date(end)));
 
         try {
-            String json = getDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
+            String json = GetDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
             CandlesEngine bte = new CandlesEngine();
             bte.parseCandles(json);
 
@@ -138,7 +138,7 @@ public class PeriodTesterBinance {
             System.out.printf(" Test #%d | Period: %s ➝ %s\n", i + 1, sdf.format(new Date(start)), sdf.format(new Date(end)));
 
             try {
-                String json = getDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
+                String json = GetDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
                 CandlesEngine bte = new CandlesEngine();
                 bte.parseCandles(json);
 

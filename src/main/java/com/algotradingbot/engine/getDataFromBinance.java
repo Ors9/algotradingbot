@@ -8,7 +8,7 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONTokener;
 
-public class getDataFromBinance {
+public class GetDataFromBinance {
 
     public static String fetchKlines(String symbol, String interval, int limit) throws Exception {
         String urlString = String.format(

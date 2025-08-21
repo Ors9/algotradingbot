@@ -61,7 +61,7 @@ public class GetDataFromInteractiveBroker implements EWrapper {
     private volatile boolean rangeRunnerStarted = false;
     private final java.util.concurrent.CountDownLatch allDone = new java.util.concurrent.CountDownLatch(1);
     // AFTER:
-    private static final String BATCH_DURATION = "10 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
+    private static final String BATCH_DURATION = "5 Y";  // נסה קודם 1Y, ואם יקפוץ גודל-נתונים רד ל-"6M"
 
     private final String currency;
     private final String timeFrame;
@@ -232,10 +232,11 @@ public class GetDataFromInteractiveBroker implements EWrapper {
                 pagingEndDateTime = fmtEndUtc(nextEndEpoch);
 
                 // מנוחה קטנה נגד pacing
-                try {
-                    Thread.sleep(1100);
+                /*try {
+                    Thread.sleep(100);//it was at start 1100
                 } catch (InterruptedException ignored) {
-                }
+                    System.out.println("ask too much in time");
+                }*/
             }
         } catch (InterruptedException ignored) {
             // אפשר לוג

@@ -6,7 +6,8 @@ import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.StrategyPerformance;
 import com.algotradingbot.strategies.BBbandWithComma;
-import com.algotradingbot.strategies.MWPatternStrategy;
+import com.algotradingbot.strategies.MWPatternStrategyEURUSD1H;
+import com.algotradingbot.strategies.MWPatternTest;
 import com.algotradingbot.utils.CandleUtils;
 
 
@@ -39,21 +40,45 @@ public class PeriodTesterInteractiveBroker {
 
             ArrayList<Candle> candles = CandleUtils.normalizeFxCandles(fetcher.getCandles()); // תוסיף getter
 
-            testMWPatternStrategy(candles);
+            //testMWPatternStrategyEURUSD1H(candles);
+            testMWPatternStrategyTester(candles);
             
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static StrategyPerformance testMWPatternStrategy(ArrayList<Candle> candles) {
+    private static StrategyPerformance testMWPatternStrategyEURUSD1H(ArrayList<Candle> candles) {
         // בחר גודל סיכון לעסקה ויחס RR (משמש רק לחישוב גודל פוזיציה/דוח)
         double riskPerTradeUSD = 20.0;
 
-        MWPatternStrategy strategy = new MWPatternStrategy(
+        MWPatternStrategyEURUSD1H strategy = new MWPatternStrategyEURUSD1H(
                 candles,
                 riskPerTradeUSD
         );
+
+        strategy.runBackTest();
+        strategy.evaluateSignals();
+
+        StrategyPerformance perf = strategy.evaluatePerformanceEURUSD();
+
+        CandleChart.showChartFx(
+                strategy.getCandles(),
+                strategy.getSignals(),
+                perf.getCombinedPerformance(),
+                CandleChart.ChartOverlayMode.DIVERGENCE
+        );
+
+        perf.print();
+
+        return perf;
+    }
+
+        private static StrategyPerformance testMWPatternStrategyTester(ArrayList<Candle> candles) {
+        // בחר גודל סיכון לעסקה ויחס RR (משמש רק לחישוב גודל פוזיציה/דוח)
+        double riskPerTradeUSD = 20.0;
+
+        MWPatternTest strategy = new MWPatternTest(candles);
 
         strategy.runBackTest();
         strategy.evaluateSignals();

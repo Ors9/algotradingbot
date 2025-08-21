@@ -44,9 +44,9 @@ public class App {
             NZDUSD
          */
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
-                "EURUSD", // או כל זוג נתמך
+                "AUDUSD", // או כל זוג נתמך
                 "1 hour", 
-                "20 Y",
+                "5 Y",
                 "",
                 "127.0.0.1",
                 7497

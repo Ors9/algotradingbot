@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.engine.CandlesEngine;
-import com.algotradingbot.engine.getDataFromBinance;
+import com.algotradingbot.engine.GetDataFromBinance;
 
 public class TFtrendAnalyzer {
 
@@ -27,7 +27,7 @@ public class TFtrendAnalyzer {
             long start = toMillis(this.startDate);
             long end = toMillis(this.endDate);
 
-            String json = getDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
+            String json = GetDataFromBinance.fetchKlinesRange(symbol, interval, start, end);
             CandlesEngine bte = new CandlesEngine();
             bte.parseCandles(json);
             candles1D.addAll(bte.getCandles());

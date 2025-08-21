@@ -9,7 +9,7 @@ import com.algotradingbot.utils.MPatternEURUSD1H;
 import com.algotradingbot.utils.TrendUtils;
 import com.algotradingbot.utils.WPatternEURUSD1H;
 
-public class MWPatternStrategy extends TradingStrategy {
+public class MWPatternStrategyEURUSD1H extends TradingStrategy {
 
     private static final int START_PERIOD = 70;
     private static final int ATR_PERIOD = 10;
@@ -21,7 +21,7 @@ public class MWPatternStrategy extends TradingStrategy {
     private static final int CAN_TRADE = 0;
     private static int coolDownFromTrade = CAN_TRADE;
 
-    public MWPatternStrategy(ArrayList<Candle> candles, double riskPerTradeUSD) {
+    public MWPatternStrategyEURUSD1H(ArrayList<Candle> candles, double riskPerTradeUSD) {
         super(candles);
         this.riskPerTradeUSD = riskPerTradeUSD;
     }
