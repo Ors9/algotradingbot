@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
-import com.algotradingbot.utils.MPattern;
+import com.algotradingbot.utils.MPatternEURUSD1H;
 import com.algotradingbot.utils.TrendUtils;
-import com.algotradingbot.utils.WPattern;
+import com.algotradingbot.utils.WPatternEURUSD1H;
 
 public class MWPatternStrategy extends TradingStrategy {
 
@@ -16,6 +16,11 @@ public class MWPatternStrategy extends TradingStrategy {
     private static final double RR_RATIO = 0.8;   // 1:1
     private static final double ATR_MULT = 2.0;   // כמה ATR לשים לסטופ
 
+
+    private static final int COOLDOWN_FACTOR_CANT_TRADE = 3;
+    private static final int CAN_TRADE = 0;
+    private static int coolDownFromTrade = CAN_TRADE;
+
     public MWPatternStrategy(ArrayList<Candle> candles, double riskPerTradeUSD) {
         super(candles);
         this.riskPerTradeUSD = riskPerTradeUSD;
@@ -23,6 +28,7 @@ public class MWPatternStrategy extends TradingStrategy {
 
     @Override
     public void runBackTest() {
+        coolDownFromTrade = CAN_TRADE;
         if (candles == null || candles.size() < START_PERIOD) {
             return;
         }
@@ -33,6 +39,11 @@ public class MWPatternStrategy extends TradingStrategy {
                 continue;
             }
 
+            if (coolDownFromTrade > CAN_TRADE) {
+                coolDownFromTrade--;
+                continue;
+            }
+
             Candle curr = candles.get(i);
 
             // 1) M-pattern -> SHORT
@@ -40,6 +51,7 @@ public class MWPatternStrategy extends TradingStrategy {
                 Signal shortSig = createSellSignalATR_MajorForex(i, curr, atr, ATR_MULT, RR_RATIO);
                 if (shortSig != null) {
                     signals.add(shortSig);
+                    coolDownFromTrade = COOLDOWN_FACTOR_CANT_TRADE;
                 }
                 continue; // avoid double-signalling on the same bar
             }
@@ -51,17 +63,18 @@ public class MWPatternStrategy extends TradingStrategy {
                 Signal longSig = createBuySignalATR_MajorForex(i, curr, atr, ATR_MULT, RR_RATIO);
                 if (longSig != null) {
                     signals.add(longSig);
+                    coolDownFromTrade = COOLDOWN_FACTOR_CANT_TRADE;
                 }
             }
         }
     }
 
     private boolean checkForM(int currIndex) {
-        return new MPattern(candles, currIndex).analyzeMPattern();
+        return new MPatternEURUSD1H(candles, currIndex).analyzeMPattern();
     }
 
     private boolean checkForW(int currIndex) {
-        return new WPattern(candles, currIndex).analyzeWPattern();
+        return new WPatternEURUSD1H(candles, currIndex).analyzeWPattern();
     }
 
 }

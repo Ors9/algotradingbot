@@ -7,7 +7,6 @@ import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.StrategyPerformance;
 import com.algotradingbot.strategies.BBbandWithComma;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
-import com.algotradingbot.strategies.MWPatternStrategy;
 import com.algotradingbot.strategies.TrendRSIBBBand;
 
 public class PeriodTesterBinance {

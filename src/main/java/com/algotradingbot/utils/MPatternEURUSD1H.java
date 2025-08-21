@@ -4,8 +4,22 @@ import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
 
+
+ /*
+ 
+ * MW Pattern 1H EURUSD RESULT: 
+=== Long Performance ===
+W:125 | L:65  | WinRate: 65.79% | Profit: $  510.00 | MaxDD: $  201.00
+=== Short Performance ===
+W:112 | L:61  | WinRate: 64.74% | Profit: $  399.00 | MaxDD: $  150.00
+=== Combined Performance ===
+W:237 | L:126 | WinRate: 65.29% | Profit: $  909.00 | MaxDD: $  201.00
+ * 
+ */
+
+
 /*
- * M Pattern tested on 4H EURUSD
+ * M Pattern tested on 1H EURUSD
 
     1. Last candle must touch the upper Bollinger Band (20, 2.0).
     2. Last candle must be the highest high within the lookback window (50 bars).
@@ -17,7 +31,7 @@ import com.algotradingbot.core.Candle;
 
  * 
  */
-public class MPattern {
+public class MPatternEURUSD1H {
 
     private final ArrayList<Candle> candles;
     private final int currIndex;
@@ -27,7 +41,7 @@ public class MPattern {
 
     private Candle firstLegCandle;
 
-    public MPattern(ArrayList<Candle> candles, int currIndex) {
+    public MPatternEURUSD1H(ArrayList<Candle> candles, int currIndex) {
         this.candles = candles;
         this.currIndex = currIndex;
         this.firstLegCandle = null;

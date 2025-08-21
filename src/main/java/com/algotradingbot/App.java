@@ -45,8 +45,8 @@ public class App {
          */
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
                 "EURUSD", // או כל זוג נתמך
-                "4 hours",
-                "10 Y",
+                "1 hour", 
+                "20 Y",
                 "",
                 "127.0.0.1",
                 7497
@@ -56,24 +56,4 @@ public class App {
 
 }
 
-/*
-    (Not good enough the 4 hour!!!!)
- * MW Pattern 4H EurUsd Result: 
- * === Long Performance ===
-    W:25  | L:12  | WinRate: 67.57% | Profit: $  123.00 | MaxDD: $   84.00
-    === Short Performance ===
-    W:30  | L:2   | WinRate: 93.75% | Profit: $  408.00 | MaxDD: $   42.00
-    === Combined Performance ===
-    W:55  | L:14  | WinRate: 79.71% | Profit: $  531.00 | MaxDD: $   84.00
- * 
- */
- /*
- * MW Pattern 1H EurUsd RESULT: 
-    * === Long Performance ===
-    W:131 | L:67  | WinRate: 66.16% | Profit: $  558.00 | MaxDD: $  237.00
-    === Short Performance ===
-    W:96  | L:42  | WinRate: 69.57% | Profit: $  558.00 | MaxDD: $  261.00
-    === Combined Performance ===
-    W:227 | L:109 | WinRate: 67.56% | Profit: $ 1116.00 | MaxDD: $  261.00
- * 
- */
+
