@@ -28,9 +28,10 @@ public class PeriodTesterBinance {
  /*StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
             System.out.println("Results for Strategy:");
             oldStrategy.print();*/
-            //StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
-            //bbBandWithComma.print();
-            
+            System.out.println("BB With comma");
+            StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
+            bbBandWithComma.print();
+            System.out.println("Mw Pattern");
             StrategyPerformance mwPtrn = testMWPattern(bte);
             mwPtrn.print();
 
