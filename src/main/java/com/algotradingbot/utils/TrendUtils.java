@@ -468,7 +468,21 @@ public class TrendUtils {
         return new BollingerBands(sma, upper, lower);
     }
 
-    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period, double multiplier) {
+    public static boolean isNearUpperBB(List<Candle> candles, int index, int period, double maxFracOfBand, double multiplier) {
+        BollingerBands bb = getBollingerBands(candles, index, period, multiplier);
+        if (bb == null) {
+            return false;
+        }
+        Candle c = candles.get(index);
+        double bandWidth = bb.getUpper() - bb.getLower();
+        if (bandWidth <= 0) {
+            return false;
+        }
+        double distFromUpper = bb.getUpper() - c.getHigh(); // כמה רחוק מהעליון
+        return distFromUpper >= 0 && (distFromUpper / bandWidth) <= maxFracOfBand; // “כמעט־נגיעה”
+    }
+
+    public static boolean isTouchingUpperBB(ArrayList<Candle> candles, int index, int period, double multiplier) {
         if (index < period - 1) {
             return false; // Not enough candles
         }

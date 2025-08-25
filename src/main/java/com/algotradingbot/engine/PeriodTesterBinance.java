@@ -7,8 +7,7 @@ import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.StrategyPerformance;
 import com.algotradingbot.strategies.BBbandWithComma4HBTCUSDT;
 import com.algotradingbot.strategies.MWPatternBTCUSDT1H;
-import com.algotradingbot.strategies.OldInsideBarStrategy;
-import com.algotradingbot.strategies.TrendRSIBBBand;
+
 
 public class PeriodTesterBinance {
 
@@ -22,16 +21,14 @@ public class PeriodTesterBinance {
             CandlesEngine bte = new CandlesEngine();
             bte.parseCandles(json);
 
-            /*StrategyPerformance perf = testTrendRSIBBBand(bte);
-            System.out.println("Results for Strategy:");
-            perf.print();*/
- /*StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
-            System.out.println("Results for Strategy:");
-            oldStrategy.print();*/
-            System.out.println("BB With comma");
+            System.out.println("Test trendRsiBB band");
+
+
+            System.out.println("BB With comma 4H");
             StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
             bbBandWithComma.print();
-            System.out.println("Mw Pattern");
+
+            System.out.println("Mw Pattern 1H");
             StrategyPerformance mwPtrn = testMWPattern(bte);
             mwPtrn.print();
 
@@ -193,15 +190,7 @@ public class PeriodTesterBinance {
         return groupPerformance;
     }
 
-    private static StrategyPerformance testOldInsideBarStrategy(CandlesEngine bte) {
-        OldInsideBarStrategy strategy = new OldInsideBarStrategy(bte.getCandles());
-        strategy.runBackTest();
-        strategy.evaluateSignals();
-        //strategy.printSignals();
-        StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance(), CandleChart.ChartOverlayMode.TREND_RSI_BB);
-        return strategy.evaluatePerformance();
-    }
+
 
     private static StrategyPerformance testBBbandWithCommaStrategy(CandlesEngine bte) {
         BBbandWithComma4HBTCUSDT strategy = new BBbandWithComma4HBTCUSDT(bte.getCandles());
@@ -213,15 +202,7 @@ public class PeriodTesterBinance {
         return strategy.evaluatePerformance();
     }
 
-    private static StrategyPerformance testTrendRSIBBBand(CandlesEngine bte) {
-        TrendRSIBBBand strategy = new TrendRSIBBBand(bte.getCandles());
-        strategy.runBackTest();
-        strategy.evaluateSignals();
-        strategy.printSignals();
-        StrategyPerformance perf = strategy.evaluatePerformance();
-        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance(), CandleChart.ChartOverlayMode.TREND_RSI_BB);
-        return strategy.evaluatePerformance();
-    }
+
 
     private static StrategyPerformance testMWPattern(CandlesEngine bte) {
         MWPatternBTCUSDT1H strategy = new MWPatternBTCUSDT1H(bte.getCandles());
