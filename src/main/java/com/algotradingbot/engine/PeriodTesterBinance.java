@@ -5,7 +5,8 @@ import java.text.SimpleDateFormat;
 
 import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.StrategyPerformance;
-import com.algotradingbot.strategies.BBbandWithComma;
+import com.algotradingbot.strategies.BBbandWithComma4HBTCUSDT;
+import com.algotradingbot.strategies.MWPatternTest;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
 import com.algotradingbot.strategies.TrendRSIBBBand;
 
@@ -27,8 +28,11 @@ public class PeriodTesterBinance {
  /*StrategyPerformance oldStrategy = testOldInsideBarStrategy(bte);
             System.out.println("Results for Strategy:");
             oldStrategy.print();*/
-            StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
-            bbBandWithComma.print();
+            //StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
+            //bbBandWithComma.print();
+            
+            StrategyPerformance mwPtrn = testMWPattern(bte);
+            mwPtrn.print();
 
         } catch (Exception e) {
             System.err.println("Error during test: " + e.getMessage());
@@ -150,15 +154,22 @@ public class PeriodTesterBinance {
                 } else {
                     groupPerformance = groupPerformance.add(perf1);
                 }*/
+                /* 
                 StrategyPerformance bbBandWithComma = testBBbandWithCommaStrategy(bte);
                 bbBandWithComma.print();
                 if (groupPerformance == null) {
                     groupPerformance = bbBandWithComma;
                 } else {
                     groupPerformance = groupPerformance.add(bbBandWithComma);
-                }
-
+                }*/
                 
+                StrategyPerformance mwPtrn = testMWPattern(bte);
+                mwPtrn.print();
+                if (groupPerformance == null) {
+                    groupPerformance = mwPtrn;
+                } else {
+                    groupPerformance = groupPerformance.add(mwPtrn);
+                }
 
                 /*StrategyPerformance perf2 = testTrendRSIBBBand(bte);
                 System.out.println("Results for DashMarketStrategy:");
@@ -192,7 +203,7 @@ public class PeriodTesterBinance {
     }
 
     private static StrategyPerformance testBBbandWithCommaStrategy(CandlesEngine bte) {
-        BBbandWithComma strategy = new BBbandWithComma(bte.getCandles());
+        BBbandWithComma4HBTCUSDT strategy = new BBbandWithComma4HBTCUSDT(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();
@@ -211,5 +222,14 @@ public class PeriodTesterBinance {
         return strategy.evaluatePerformance();
     }
 
+    private static StrategyPerformance testMWPattern(CandlesEngine bte) {
+        MWPatternTest strategy = new MWPatternTest(bte.getCandles());
+        strategy.runBackTest();
+        strategy.evaluateSignals();
+        //strategy.printSignals();
+        StrategyPerformance perf = strategy.evaluatePerformance();
+        CandleChart.showChart(strategy.getCandles(), strategy.getSignals(), perf.getCombinedPerformance(), CandleChart.ChartOverlayMode.DIVERGENCE);
+        return strategy.evaluatePerformance();
+    }
 
 }

@@ -10,7 +10,7 @@ import com.algotradingbot.utils.FilterRejectionTracker;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
-public class BBbandWithComma extends TradingStrategy {
+public class BBbandWithComma4HBTCUSDT extends TradingStrategy {
 
     private static final double STRONG_WICK_FACTOR = 1.6;
     private final int MIN_CANDLES_FOR_STRATEGY = 200;
@@ -25,7 +25,7 @@ public class BBbandWithComma extends TradingStrategy {
      * 3. reverse candle
      * 4. entry stop loss
      */
-    public BBbandWithComma(ArrayList<Candle> candles) {
+    public BBbandWithComma4HBTCUSDT(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = 20.0;
         this.riskReward = 2;

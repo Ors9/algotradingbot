@@ -217,6 +217,44 @@ public abstract class TradingStrategy {
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, true);
     }
 
+    // SHORT: SL above entry by k*ATR; TP below entry by RR*k*ATR
+    public Signal createSellSignalATR(int index, Candle curr, double atr, double atrMult, double rr) {
+        if (Double.isNaN(atr) || atr <= 0 || atrMult <= 0 || rr <= 0) {
+            return null;
+        }
+
+        double entryPrice = curr.getClose();
+        double riskPerUnit = atrMult * atr;          // distance to SL
+        double stopLossPrice = entryPrice + riskPerUnit;
+        double takeProfitPrice = entryPrice - rr * riskPerUnit;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, /*isLong=*/ false);
+    }
+
+// LONG: SL below entry by k*ATR; TP above entry by RR*k*ATR
+    public Signal createBuySignalATR(int index, Candle curr, double atr, double atrMult, double rr) {
+        if (Double.isNaN(atr) || atr <= 0 || atrMult <= 0 || rr <= 0) {
+            return null;
+        }
+
+        double entryPrice = curr.getClose();
+        double riskPerUnit = atrMult * atr;          // distance to SL
+        double stopLossPrice = entryPrice - riskPerUnit;
+        double takeProfitPrice = entryPrice + rr * riskPerUnit;
+
+        if (riskPerUnit <= 0) {
+            return null;
+        }
+        double positionSize = riskPerTradeUSD / riskPerUnit;
+
+        return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, /*isLong=*/ true);
+    }
+
     public Signal createSellSignalFromClose(int index, Candle curr) {
         double stopLossPct = 0.002; // 0.2% מעל השיא
 
@@ -236,29 +274,6 @@ public abstract class TradingStrategy {
         double takeProfitPrice = entryPrice - (riskReward * riskPerUnit);
 
         return new Signal(index, entryPrice, takeProfitPrice, stopLossPrice, positionSize, false);
-    }
-
-// --- ATR-based LONG (entry at close) ---
-    public Signal createBuySignalATR(
-            int index, Candle curr,
-            double atr, double atrMult,
-            double riskReward) {
-
-        if (curr == null || atr <= 0 || Double.isNaN(atr) || atrMult <= 0) {
-            return null;
-        }
-
-        double entry = curr.getClose();                 // ✅ enter at close
-        double stop = entry - (atrMult * atr);         // SL below entry by ATR
-        double riskPerUnit = entry - stop;              // must be > 0
-        if (riskPerUnit <= 0) {
-            return null;
-        }
-
-        double tp = entry + (riskReward * riskPerUnit); // RR (e.g., 1.0 for 1:1)
-
-        // Signal(int index, double entryPrice, double tpPrice, double stopPrice, double riskUsd, boolean isLong)
-        return new Signal(index, entry, tp, stop, riskPerTradeUSD, true);
     }
 
     /*

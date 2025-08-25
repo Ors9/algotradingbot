@@ -91,7 +91,7 @@ public class MPatternEURUSD1H {
         }
 
         //Try looking for Exausted market all 70 candles close  above the 50 ema
-        int numberOfCandlesAboveEma = 70;
+        int numberOfCandlesAboveEma = 50;
         for (int i = currIndex; i > currIndex - numberOfCandlesAboveEma; i--) {
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);

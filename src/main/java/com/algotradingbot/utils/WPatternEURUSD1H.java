@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
 
- /*
+/*
  
  * MW Pattern 1H EURUSD RESULT: 
 === Long Performance ===
@@ -16,7 +16,7 @@ W:237 | L:126 | WinRate: 65.29% | Profit: $  909.00 | MaxDD: $  201.00
  * 
  */
 
-/*
+ /*
  * W Pattern tested on 4H EURUSD (analog of M Pattern)
  *
  *  1. Last candle must touch the LOWER Bollinger Band (20, 2.0).
@@ -95,7 +95,7 @@ public class WPatternEURUSD1H {
         }
 
         // Exhausted bearish: last N candles all close BELOW EMA50
-        int numberOfCandlesBelowEma = 70;
+        int numberOfCandlesBelowEma = 50;
         for (int i = currIndex; i > currIndex - numberOfCandlesBelowEma; i--) {
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);
@@ -126,7 +126,7 @@ public class WPatternEURUSD1H {
         double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
 
         // Last RSI must be ABOVE the prior RSI minimum (bullish divergence feel)
-        if (rsiMin > rsiLast) {
+        if (rsiLast <= rsiMin + 5.0) {
             return false;
         }
 

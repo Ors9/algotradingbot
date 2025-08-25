@@ -3,9 +3,14 @@ package com.algotradingbot.utils;
 import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
-
+import static com.algotradingbot.utils.CandleUtils.hasStrongBody;
+/*
+ * BTCUSDT 1H M pattern
+ * 
+ */
 public class MPatternTest {
-     private final ArrayList<Candle> candles;
+
+    private final ArrayList<Candle> candles;
     private final int currIndex;
 
     private int candleThatFoundPullBack;
@@ -27,9 +32,12 @@ public class MPatternTest {
         int bbPeriod = TrendUtils.BBPeriod.BB_20.getPeriod();
 
         Candle lastCandle = candles.get(currIndex);
+        if (!hasStrongBody(lastCandle)) {
+            return false;
+        }
 
         // (0) H2 חייב לגעת Upper BB
-        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod, TrendUtils.BBStdDev.STD_2_7.getMultiplier())) {
+        if (!TrendUtils.isTouchingUpperBB(candles, currIndex, bbPeriod, TrendUtils.BBStdDev.STD_2_5.getMultiplier())) {
             return false;
         }
 
@@ -62,12 +70,14 @@ public class MPatternTest {
             return false;
         }
 
-        //Try looking for Exausted market all 70 candles close  above the 50 ema
-        int numberOfCandlesAboveEma = 70;
+  
+
+        //Try looking for Exausted market all 50 candles close  above the 50 ema
+        int numberOfCandlesAboveEma = 50;
         for (int i = currIndex; i > currIndex - numberOfCandlesAboveEma; i--) {
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);
-            if (currEma == null || curr.getClose() < currEma) {
+            if (currEma == null || curr.getClose() < currEma ) {
                 return false;
             }
         }
@@ -79,7 +89,7 @@ public class MPatternTest {
             if (lastCandle.getHigh() <= curr.getHigh()) {
                 return false;
             }
-            double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+            double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
             rsiMax = Math.max(rsiMax, currRsi);
 
             if (firstLegCandle == null || firstLegCandle.getHigh() <= curr.getHigh()) {
@@ -88,7 +98,7 @@ public class MPatternTest {
 
         }
 
-        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
 
         if (rsiMax < rsiLast) {
             return false;

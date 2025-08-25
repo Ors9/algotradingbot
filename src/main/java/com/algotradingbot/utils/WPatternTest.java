@@ -11,6 +11,8 @@ public class WPatternTest {
 
     private int candleThatFoundPullBack;
     private final int DIDNT_FOUND_PULL_BACK = -1;
+    private final int DIVERGANCE_OFFSET = 5;
+    private final int NUM_OF_CANDLES_BELOW_EMA = 50;
 
     private Candle firstLegCandle; // here: first leg = lowest low candidate
 
@@ -29,11 +31,7 @@ public class WPatternTest {
         Candle lastCandle = candles.get(currIndex);
 
         // (0) L2 must touch Lower BB (20, 2.0)
-        if (!TrendUtils.isTouchingLowerBB(
-                candles,
-                currIndex,
-                bbPeriod,
-                TrendUtils.BBStdDev.STD_2_7.getMultiplier())) {
+        if (!TrendUtils.isTouchingLowerBB(candles, currIndex, bbPeriod, TrendUtils.BBStdDev.STD_2_0.getMultiplier())) {
             return false;
         }
 
@@ -67,12 +65,12 @@ public class WPatternTest {
             return false;
         }
 
-        // Exhausted bearish: last N candles all close BELOW EMA50
-        int numberOfCandlesBelowEma = 100;
-        for (int i = currIndex; i > currIndex - numberOfCandlesBelowEma; i--) {
+
+
+        for (int i = currIndex; i > currIndex - NUM_OF_CANDLES_BELOW_EMA; i--) {
             Double currEma = TrendUtils.calculateEMAAtIndex(candles, i, TrendUtils.EMAType.EMA_50.getPeriod());
             Candle curr = candles.get(i);
-            if (currEma == null || curr.getClose() > currEma) {
+            if (currEma == null || curr.getClose() > currEma ) {
                 return false;
             }
         }
@@ -88,7 +86,7 @@ public class WPatternTest {
                 return false;
             }
 
-            double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+            double currRsi = TrendUtils.calculateRSI(candles, i, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
             rsiMin = Math.min(rsiMin, currRsi);
 
             if (firstLegCandle == null || firstLegCandle.getLow() >= curr.getLow()) {
@@ -96,10 +94,10 @@ public class WPatternTest {
             }
         }
 
-        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_10.getValue());
+        double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
 
         // Last RSI must be ABOVE the prior RSI minimum (bullish divergence feel)
-        if (rsiMin > rsiLast) {
+        if (rsiLast < rsiMin + DIVERGANCE_OFFSET) { // small margin
             return false;
         }
 

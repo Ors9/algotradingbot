@@ -6,8 +6,8 @@ import com.algotradingbot.engine.PeriodTesterInteractiveBroker;
 public class App {
 
     public static void main(String[] args) {
-        //BackTesterBinance();
-        BackTesterInteractiveBroker();
+        BackTesterBinance();
+        //BackTesterInteractiveBroker();
 
     }
 
@@ -20,7 +20,7 @@ public class App {
         //PeriodTesterBinance.runTestsForMultiplePeriods("BTCUSDT", "4h");
         long start = 1483228800000L; // 2017-01-01 00:00:00 UTC
         long end = System.currentTimeMillis(); // עכשיו
-        PeriodTesterBinance.runSinglePeriodTestBinance("BTCUSDT", "4h", start, end); //almost 9 years
+        PeriodTesterBinance.runSinglePeriodTestBinance("BTCUSDT", "1h", start, end); //almost 9 years
 
         //PeriodTesterBinance.runSinglePeriodTestBinance("BTCUSDT", "15m", start, end); //almost 9 years
         //BTCUSDT  ETHUSDT  BNBUSDT   XRPUSDT SOLUSDT
@@ -44,9 +44,9 @@ public class App {
             NZDUSD
          */
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
-                "AUDUSD", // או כל זוג נתמך
+                "GBPUSD", // או כל זוג נתמך
                 "1 hour", 
-                "5 Y",
+                "20 Y",
                 "",
                 "127.0.0.1",
                 7497

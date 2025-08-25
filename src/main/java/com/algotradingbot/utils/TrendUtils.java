@@ -347,6 +347,44 @@ public class TrendUtils {
         return valid;
     }
 
+    // Count how many times EMA fast/slow cross in last `lookback` bars
+    private static int countEMACrosses(ArrayList<Candle> candles, int index,
+            int lookback, int fastPeriod, int slowPeriod) {
+        int start = Math.max(0, index - lookback + 1);
+        int crosses = 0;
+
+        Double prevFast = calculateEMAAtIndex(candles, start, fastPeriod);
+        Double prevSlow = calculateEMAAtIndex(candles, start, slowPeriod);
+        if (prevFast == null || prevSlow == null) {
+            return 0;
+        }
+
+        boolean prevAbove = prevFast > prevSlow;
+
+        for (int i = start + 1; i <= index; i++) {
+            Double fast = calculateEMAAtIndex(candles, i, fastPeriod);
+            Double slow = calculateEMAAtIndex(candles, i, slowPeriod);
+            if (fast == null || slow == null) {
+                continue;
+            }
+
+            boolean currAbove = fast > slow;
+            if (currAbove != prevAbove) {
+                crosses++;
+                prevAbove = currAbove;
+            }
+        }
+        return crosses;
+    }
+
+    // Decide if sideways by EMA cross frequency
+    public static boolean isSidewaysByCrosses(ArrayList<Candle> candles, int index,
+            int lookback, int fastPeriod, int slowPeriod,
+            int minCrosses) {
+        int crosses = countEMACrosses(candles, index, lookback, fastPeriod, slowPeriod);
+        return crosses >= minCrosses;
+    }
+
     public static boolean isHighTimeFrameBearishComma(ArrayList<Candle> candles, int index) {
 
         Double ema21 = calculateEMAAtIndex(candles, index, EMAType.EMA_21.getPeriod());
@@ -377,7 +415,7 @@ public class TrendUtils {
 
     }
 
-    public static boolean isNearLowerBB(List<Candle> candles, int index, int period, double maxFracOfBand , double multiplier) {
+    public static boolean isNearLowerBB(List<Candle> candles, int index, int period, double maxFracOfBand, double multiplier) {
         BollingerBands bb = getBollingerBands(candles, index, period, multiplier);
         if (bb == null) {
             return false;
@@ -391,12 +429,12 @@ public class TrendUtils {
         return distFromLower >= 0 && (distFromLower / bandWidth) <= maxFracOfBand; // “כמעט־נגיעה”
     }
 
-    public static boolean isTouchingLowerBB(List<Candle> candles, int index, int period , double multiplier) {
+    public static boolean isTouchingLowerBB(List<Candle> candles, int index, int period, double multiplier) {
         if (index < period - 1) {
             return false; // Not enough candles
         }
 
-        BollingerBands bb = getBollingerBands(candles, index, period , multiplier);
+        BollingerBands bb = getBollingerBands(candles, index, period, multiplier);
         if (bb == null) {
             return false;
         }
@@ -430,12 +468,12 @@ public class TrendUtils {
         return new BollingerBands(sma, upper, lower);
     }
 
-    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period , double multiplier) {
+    public static boolean isTouchingUpperBB(List<Candle> candles, int index, int period, double multiplier) {
         if (index < period - 1) {
             return false; // Not enough candles
         }
 
-        BollingerBands bb = getBollingerBands(candles, index, period , multiplier);
+        BollingerBands bb = getBollingerBands(candles, index, period, multiplier);
         if (bb == null) {
             return false;
         }

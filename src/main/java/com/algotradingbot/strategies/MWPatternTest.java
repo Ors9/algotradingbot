@@ -8,12 +8,17 @@ import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.MPatternTest;
 import com.algotradingbot.utils.TrendUtils;
 import com.algotradingbot.utils.WPatternTest;
-
+/*
+    BTCUSDT 1H results!
+ * === Combined Performance ===
+W:73  | L:36  | WinRate: 66.97% | Profit: $  366.62 | MaxDD: $  125.42
+ * 
+ */
 public class MWPatternTest extends TradingStrategy{
-        private static final int START_PERIOD = 70;
+    private static final int START_PERIOD = 70;
     private static final int ATR_PERIOD = 10;
-    private static final double RR_RATIO = 0.8;   // 1:1
-    private static final double ATR_MULT = 2.0;   // כמה ATR לשים לסטופ
+    private static final double RR_RATIO = 0.9;   
+    private static final double ATR_MULT = 2;   // כמה ATR לשים לסטופ
 
     private static final int RISK_PER_TRADE = 20;
     private static final int COOLDOWN_FACTOR_CANT_TRADE = 3;
@@ -23,6 +28,7 @@ public class MWPatternTest extends TradingStrategy{
     public MWPatternTest(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = RISK_PER_TRADE;
+        this.riskReward = RR_RATIO;
     }
 
     @Override
@@ -45,21 +51,9 @@ public class MWPatternTest extends TradingStrategy{
 
             Candle curr = candles.get(i);
 
-            // 1) M-pattern -> SHORT
-            if (checkForM(i)) {
-                Signal shortSig = createSellSignalATR_MajorForex(i, curr, atr, ATR_MULT, RR_RATIO);
-                if (shortSig != null) {
-                    signals.add(shortSig);
-                    coolDownFromTrade = COOLDOWN_FACTOR_CANT_TRADE;
-                }
-                continue; // avoid double-signalling on the same bar
-            }
-
-            // 2) W-pattern -> LONG
+            //  W-pattern -> LONG
             if (checkForW(i)) {
-                // Use the buy-side ATR helper parallel to your sell helper.
-                // If your base class uses a different name, swap it accordingly.
-                Signal longSig = createBuySignalATR_MajorForex(i, curr, atr, ATR_MULT, RR_RATIO);
+                Signal longSig  = createBuySignalATR(i, curr, atr, ATR_MULT, RR_RATIO);
                 if (longSig != null) {
                     signals.add(longSig);
                     coolDownFromTrade = COOLDOWN_FACTOR_CANT_TRADE;

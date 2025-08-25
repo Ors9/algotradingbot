@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.Candle;
 import com.algotradingbot.core.StrategyPerformance;
-import com.algotradingbot.strategies.BBbandWithComma;
+import com.algotradingbot.strategies.BBbandWithComma4HBTCUSDT;
 import com.algotradingbot.strategies.MWPatternStrategyEURUSD1H;
 import com.algotradingbot.strategies.MWPatternTest;
 import com.algotradingbot.utils.CandleUtils;
@@ -40,7 +40,9 @@ public class PeriodTesterInteractiveBroker {
 
             ArrayList<Candle> candles = CandleUtils.normalizeFxCandles(fetcher.getCandles()); // תוסיף getter
 
-            //testMWPatternStrategyEURUSD1H(candles);
+            System.out.println("Eurusd strategy result:");
+            testMWPatternStrategyEURUSD1H(candles);
+            System.out.println("TESTING strategy result:");
             testMWPatternStrategyTester(candles);
             
         } catch (Exception e) {
@@ -101,7 +103,7 @@ public class PeriodTesterInteractiveBroker {
         // בחר גודל סיכון לעסקה ויחס RR (משמש רק לחישוב גודל פוזיציה/דוח)
         double riskPerTradeUSD = 20.0;
 
-        BBbandWithComma strategy = new BBbandWithComma(candles);
+        BBbandWithComma4HBTCUSDT strategy = new BBbandWithComma4HBTCUSDT(candles);
 
         strategy.runBackTest();
         strategy.evaluateSignals();
