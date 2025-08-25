@@ -5,20 +5,18 @@ import java.util.ArrayList;
 import com.algotradingbot.core.Candle;
 
 
- /*
+/*
  
  * MW Pattern 1H EURUSD RESULT: 
 === Long Performance ===
-W:125 | L:65  | WinRate: 65.79% | Profit: $  510.00 | MaxDD: $  201.00
+W:258 | L:140 | WinRate: 64.82% | Profit: $  930.00 | MaxDD: $  198.00
 === Short Performance ===
-W:112 | L:61  | WinRate: 64.74% | Profit: $  399.00 | MaxDD: $  150.00
+W:217 | L:135 | WinRate: 61.65% | Profit: $  420.00 | MaxDD: $  234.00
 === Combined Performance ===
-W:237 | L:126 | WinRate: 65.29% | Profit: $  909.00 | MaxDD: $  201.00
+W:475 | L:275 | WinRate: 63.33% | Profit: $ 1350.00 | MaxDD: $  234.00
  * 
  */
-
-
-/*
+ /*
  * M Pattern tested on 1H EURUSD
 
     1. Last candle must touch the upper Bollinger Band (20, 2.0).

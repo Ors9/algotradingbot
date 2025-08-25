@@ -3,13 +3,13 @@ package com.algotradingbot.strategies;
 import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
-import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.CandleUtils;
 import com.algotradingbot.utils.FilterRejectionTracker;
 import com.algotradingbot.utils.TimeUtils;
 import com.algotradingbot.utils.TrendUtils;
 
+/*INvalid strategy not work */
 public class OldInsideBarStrategy extends TradingStrategy {
 
     private final int SMA_DAYS_20 = 20;

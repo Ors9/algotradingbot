@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.algotradingbot.core.Candle;
 
-public class WPatternTest {
+public class WPatternBTCUSDT1H {
 
     private final ArrayList<Candle> candles;
     private final int currIndex;
@@ -16,7 +16,7 @@ public class WPatternTest {
 
     private Candle firstLegCandle; // here: first leg = lowest low candidate
 
-    public WPatternTest(ArrayList<Candle> candles, int currIndex) {
+    public WPatternBTCUSDT1H(ArrayList<Candle> candles, int currIndex) {
         this.candles = candles;
         this.currIndex = currIndex;
         this.firstLegCandle = null;

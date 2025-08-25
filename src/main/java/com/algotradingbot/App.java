@@ -6,8 +6,8 @@ import com.algotradingbot.engine.PeriodTesterInteractiveBroker;
 public class App {
 
     public static void main(String[] args) {
-        BackTesterBinance();
-        //BackTesterInteractiveBroker();
+        //BackTesterBinance();
+        BackTesterInteractiveBroker();
 
     }
 
@@ -44,7 +44,7 @@ public class App {
             NZDUSD
          */
         PeriodTesterInteractiveBroker.runSinglePeriodTest(
-                "GBPUSD", // או כל זוג נתמך
+                "EURUSD", // או כל זוג נתמך
                 "1 hour", 
                 "20 Y",
                 "",

@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import com.algotradingbot.chart.CandleChart;
 import com.algotradingbot.core.StrategyPerformance;
 import com.algotradingbot.strategies.BBbandWithComma4HBTCUSDT;
-import com.algotradingbot.strategies.MWPatternTest;
+import com.algotradingbot.strategies.MWPatternBTCUSDT1H;
 import com.algotradingbot.strategies.OldInsideBarStrategy;
 import com.algotradingbot.strategies.TrendRSIBBBand;
 
@@ -223,7 +223,7 @@ public class PeriodTesterBinance {
     }
 
     private static StrategyPerformance testMWPattern(CandlesEngine bte) {
-        MWPatternTest strategy = new MWPatternTest(bte.getCandles());
+        MWPatternBTCUSDT1H strategy = new MWPatternBTCUSDT1H(bte.getCandles());
         strategy.runBackTest();
         strategy.evaluateSignals();
         //strategy.printSignals();

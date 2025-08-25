@@ -7,14 +7,14 @@ import com.algotradingbot.core.Signal;
 import com.algotradingbot.core.TradingStrategy;
 import com.algotradingbot.utils.MPatternTest;
 import com.algotradingbot.utils.TrendUtils;
-import com.algotradingbot.utils.WPatternTest;
+import com.algotradingbot.utils.WPatternBTCUSDT1H;
 /*
     BTCUSDT 1H results!
  * === Combined Performance ===
 W:73  | L:36  | WinRate: 66.97% | Profit: $  366.62 | MaxDD: $  125.42
  * 
  */
-public class MWPatternTest extends TradingStrategy{
+public class MWPatternBTCUSDT1H extends TradingStrategy{
     private static final int START_PERIOD = 70;
     private static final int ATR_PERIOD = 10;
     private static final double RR_RATIO = 0.9;   
@@ -25,7 +25,7 @@ public class MWPatternTest extends TradingStrategy{
     private static final int CAN_TRADE = 0;
     private static int coolDownFromTrade = CAN_TRADE;
 
-    public MWPatternTest(ArrayList<Candle> candles) {
+    public MWPatternBTCUSDT1H(ArrayList<Candle> candles) {
         super(candles);
         this.riskPerTradeUSD = RISK_PER_TRADE;
         this.riskReward = RR_RATIO;
@@ -67,6 +67,6 @@ public class MWPatternTest extends TradingStrategy{
     }
 
     private boolean checkForW(int currIndex) {
-        return new WPatternTest(candles, currIndex).analyzeWPattern();
+        return new WPatternBTCUSDT1H(candles, currIndex).analyzeWPattern();
     }
 }

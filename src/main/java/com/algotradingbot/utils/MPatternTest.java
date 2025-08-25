@@ -100,7 +100,7 @@ public class MPatternTest {
 
         double rsiLast = TrendUtils.calculateRSI(candles, currIndex, TrendUtils.RSILevel.RSI_PERIOD_14.getValue());
 
-        if (rsiMax < rsiLast) {
+        if (rsiMax - 5 < rsiLast) {
             return false;
         }
 

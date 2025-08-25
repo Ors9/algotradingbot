@@ -9,6 +9,19 @@ import com.algotradingbot.utils.MPatternEURUSD1H;
 import com.algotradingbot.utils.TrendUtils;
 import com.algotradingbot.utils.WPatternEURUSD1H;
 
+
+/*
+ 
+ * MW Pattern 1H EURUSD RESULT: 
+=== Long Performance ===
+W:241 | L:130 | WinRate: 64.96% | Profit: $  885.00 | MaxDD: $  138.00
+=== Short Performance ===
+W:217 | L:135 | WinRate: 61.65% | Profit: $  420.00 | MaxDD: $  234.00
+=== Combined Performance ===
+W:458 | L:265 | WinRate: 63.35% | Profit: $ 1305.00 | MaxDD: $  234.00
+
+ * 
+ */
 public class MWPatternStrategyEURUSD1H extends TradingStrategy {
 
     private static final int START_PERIOD = 70;
